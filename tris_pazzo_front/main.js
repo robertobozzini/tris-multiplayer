@@ -1,7 +1,8 @@
 function getNickname() {
   const nick = document.getElementById("nickname").value.trim();
   if (!nick) {
-    alert("Inserisci un nickname prima di continuare.");
+    const valore=document.getElementById("nickname");
+    valore.style.borderBlockColor="red"
     return null;
   }
   return nick;
