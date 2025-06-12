@@ -9,7 +9,7 @@ function getNickname() {
 
 function Send(){
   const val=getNickname();
-  if(val==null) console.log("dio cane")
+  if(val==null) console.log("errore")
   else console.log(val);
 
 }
