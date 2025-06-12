@@ -11,6 +11,8 @@ function getNickname() {
 function Send(){
   const val=getNickname();
   if(val==null) console.log("errore")
-  else console.log(val);
+  else {
+    location.href="FindLobby.html"
+  }
 
 }
