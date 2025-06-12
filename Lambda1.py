@@ -8,7 +8,10 @@ def lambda_handler(event, context):
     #websocket
     print(event)
     connection_id = event['requestContext']['connectionId']
-    table.put_item(Item={'pk':'connection','sk':connection_id})
-    table.delete_item(Item={'pk':'connection','sk':connection_id})
+
+    #quando un utente si connette mettiamo il suo id come pk, poi il nickname e infine lo stato per vedere se è pronto: 1 si 0 no
+    table.put_item(Item={'pk':connection_id,'nickname':"gino",'stato':0})
+
+    table.delete_item(Item={'pk':connection_id,'nickname':"gino",'stato':1})
     
     return {'statusCode': 200}
