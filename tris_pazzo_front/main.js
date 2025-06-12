@@ -4,6 +4,12 @@ function getNickname() {
     alert("Inserisci un nickname prima di continuare.");
     return null;
   }
-  return encodeURIComponent(nick);
+  return nick;
 }
 
+function Send(){
+  const val=getNickname();
+  if(val==null) console.log("dio cane")
+  else console.log(val);
+
+}
