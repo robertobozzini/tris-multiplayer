@@ -122,3 +122,18 @@ button:hover {
 #createLobby{
   margin-bottom: 0px;
 }
+
+/* Override per la pagina lobby: il main non è più assoluto né centrato via transform */
+#lobbyPage .lobbiesMain {
+  position: static !important;      /* non usa più absolute */
+  transform: none !important;       /* niente translate centering */
+  margin: 70px auto 0 auto;         /* top spacing, centrato orizzontalmente */
+  width: 90%;
+  max-width: 600px;
+  max-height: 60vh;                 /* limite in altezza */
+  overflow-y: auto;                 /* scroll verticale se cresce troppo */
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
