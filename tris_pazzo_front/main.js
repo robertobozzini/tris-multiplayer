@@ -29,24 +29,51 @@ function Send() {
   };
 }
 
+function updateLobbyList(lobbies) {
+  const ul = document.getElementById("lobbyList");
+  ul.innerHTML = ""; // svuota la lista attuale
+
+  lobbies.forEach(lobby => {
+    const li = document.createElement("li");
+
+    // Costruisci la stringa monoriga
+    let text = `${lobby.lobby_name} – ${lobby.players}/2 giocatori`;
+    if (lobby.private==1) {
+      text += " – 🔒";
+    }
+
+    li.textContent = text;
+    ul.appendChild(li);
+  });
+}
+
+
+
 //gestione websocket
 socket.onopen = () => {
   console.log("✅ Connesso al WebSocket AWS");
+
+  socket.send(JSON.stringify({
+  "action": "lobbylist"
+  }));
 };
 
 // Quando ricevi un messaggio dal server
 socket.onmessage = (event) => {
   console.log("📨 Messaggio ricevuto:", event.data);
 
+  let data;
   try {
-    const data = JSON.parse(event.data);
-
-    if (data.action === "lobbylist") {
-      updateLobbyList(data.lobbies);
-    }
-
+    data = JSON.parse(event.data);
   } catch (e) {
-    console.error("❌ Errore nel parsing JSON:", e);
+    console.error("❌ Errore JSON:", e);
+    return;
+  }
+
+  switch (data.action) {
+    case "lobbylist":
+      updateLobbyList(data.lobbies);
+      break;
   }
 };
 
