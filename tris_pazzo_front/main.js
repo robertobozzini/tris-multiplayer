@@ -25,7 +25,7 @@ function Send() {
     }))
     document.getElementById("homePage").style.display = "none";
     document.getElementById("lobbyPage").style.display = "block";   
-    document.getElementById("userNickname").textContent = val;
+    document.getElementById("nicknameDisplay").textContent = val;
   };
 }
 
@@ -37,6 +37,17 @@ socket.onopen = () => {
 // Quando ricevi un messaggio dal server
 socket.onmessage = (event) => {
   console.log("📨 Messaggio ricevuto:", event.data);
+
+  try {
+    const data = JSON.parse(event.data);
+
+    if (data.action === "lobbylist") {
+      updateLobbyList(data.lobbies);
+    }
+
+  } catch (e) {
+    console.error("❌ Errore nel parsing JSON:", e);
+  }
 };
 
 // Gestione errori

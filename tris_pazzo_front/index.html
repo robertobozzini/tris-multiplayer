@@ -12,7 +12,7 @@
   <!-- SEZIONE HOME -->
   <section id="homePage">
     <main>
-      <h1>Tris Multiplayer!</h1>
+      <h1 id="title">TRIS MULTIPLAYER!</h1>
       <p>Inserisci il tuo nickname per iniziare:</p>
       <input type="text" id="nickname" placeholder="Es. Player123" />
       <button onclick="Send()">Invia</button>
@@ -21,17 +21,22 @@
 
   <!-- SEZIONE LOBBY -->
   <section id="lobbyPage" style="display: none;">
-    <main>
-    <h2>Benvenuto in Lobby</h2>
-    <p>Sei connesso come: <span id="userNickname"></span></p>
+    <div id="nicknameDisplay"></div>
 
-    <h3>Lista delle lobby disponibili</h3>
-    <ul id="lobbyList">
-      <!-- Lobby saranno aggiunte dinamicamente qui -->
-    </ul>
-
-    <input id="newLobbyName" placeholder="Nome nuova lobby" />
-    <button onclick="createLobby()">Crea Lobby</button>
+    <main class="lobbiesMain">
+      <div id="createLobby" >
+        <h2>Crea una lobby</h2>
+        <input id="newLobbyName" placeholder="Nome nuova lobby" />
+        <input id="newLobbyPassword" placeholder="Password lobby (facoltativo)" />
+        <button onclick="createLobby()">Crea Lobby</button>
+      </div>
+      
+      <div>      
+        <h2>Unisciti ad una lobby</h2>
+        <ul id="lobbyList"></ul>
+      </div>
+    
+    
     </main>
   </section>
 
