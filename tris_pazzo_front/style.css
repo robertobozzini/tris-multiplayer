@@ -20,13 +20,19 @@ body::before {
   z-index: 0;
 }
 
+.section{
+  text-align: center;
+}
 /* Blocca il contenuto al centro */
 main {
+  margin:auto;
   background-color: #fff; /* sfondo bianco per contrasto */
   color: #000;
+
   padding: 2rem;
   position: relative;
   z-index: 2;
+  justify-content: center;
   border-radius: 12px;
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
   width: 90%;
