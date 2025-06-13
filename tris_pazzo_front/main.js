@@ -1,12 +1,32 @@
 const socket = new WebSocket("wss://uc4cu1bz76.execute-api.eu-north-1.amazonaws.com/production");
 
+let askedOnce = false;
+
+function requestLobbies() {
+  if (!askedOnce && socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify({ action: "lobbylist" }));
+    askedOnce = true;
+    console.log("invio");
+  }
+}
+
+// All’avvio della SPA: monta tutto
 window.addEventListener("DOMContentLoaded", () => {
-  const nick = localStorage.getItem("trisNickname");
-  if (nick) {
-    // Se c'è un nickname salvato, vado direttamente in lobby
-    initSocket(() => showLobbyPage(nick));
+  // 1) Gestione logout
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("trisNickname");
+      askedOnce=false;
+      showHomePage();
+    });
+  }
+
+  // 2) Controllo se c'è già un nickname salvato
+  const savedNick = localStorage.getItem("trisNickname");
+  if (savedNick) {
+    initSocket(() => showLobbyPage(savedNick));
   } else {
-    // Altrimenti rimango in home
     showHomePage();
     initSocket();
   }
@@ -15,11 +35,14 @@ window.addEventListener("DOMContentLoaded", () => {
 function initSocket(onOpenCallback) {
   socket.onopen = () => {
     console.log("✅ Connesso al WebSocket AWS");
+    requestLobbies();
     if (onOpenCallback) onOpenCallback();
   };
 
   socket.onmessage = event => {
+    console.log("messaggio arrivato")
     let data;
+    console.log(data)
     try { data = JSON.parse(event.data); }
     catch { return; }
 
@@ -42,28 +65,15 @@ function showLobbyPage(nick) {
   document.getElementById("lobbyPage").style.display = "block";
   document.getElementById("nicknameDisplay").textContent = nick;
 
-  // Chiedo subito la lista
-  socket.send(JSON.stringify({ action: "lobbylist" }));
+  // Richiedo immediatamente la lista
+  requestLobbies();
 }
 
-//logout
-document.addEventListener("DOMContentLoaded", () => {
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      // Rimuove il nickname dallo storage
-      localStorage.removeItem("trisNickname");
-      // Torna alla home
-      showHomePage()
-    });
-  }
-});
-
 function getNickname() {
-  const nick = document.getElementById("nickname").value.trim();
+  const nickInput = document.getElementById("nickname");
+  const nick = nickInput.value.trim();
   if (!nick) {
-    const valore=document.getElementById("nickname");
-    valore.style.borderBlockColor="red"
+    nickInput.style.borderBlockColor = "red";
     return null;
   }
   return nick;
@@ -71,84 +81,36 @@ function getNickname() {
 
 function Send() {
   const val = getNickname();
-  if (val == null) {
-    console.log("errore");
-    return;
-  }
+  if (!val) return;
 
   if (socket.readyState === WebSocket.OPEN) {
-    console.log(val)
     socket.send(JSON.stringify({
-      "action": "sendnickname",
-      "nickname": val
-    }))
+      action: "sendnickname",
+      nickname: val
+    }));
+    console.log("inviato")
     localStorage.setItem("trisNickname", val);
     showLobbyPage(val);
-  };
+  }
 }
 
 function updateLobbyList(lobbies) {
+  if (!Array.isArray(lobbies)) return;
+
   const ul = document.getElementById("lobbyList");
-  ul.innerHTML = ""; // svuota la lista attuale
+  ul.innerHTML = "";
 
   lobbies.forEach(lobby => {
     const li = document.createElement("li");
+    const name      = lobby.lobby_name    || "—";
+    const players   = lobby.players       ?? 0;
+    const status    = lobby.status        || "sconosciuto";
+    const isPrivate = lobby.private == 1;
 
-    // Estrai i valori dal singolo oggetto
-    const name       = lobby.lobby_name || "—";
-    const players    = lobby.players ?? 0;
-    const status     = lobby.status || "sconosciuto";
-    const isPrivate  = lobby.private == 1;  // o true/false a seconda della tua Lambda
-
-    // Costruisci la stringa monoriga
     let text = `${name} – ${players} giocatori – ${status}`;
-    if (isPrivate) {
-      text += " – 🔒";
-    }
+    if (isPrivate) text += " – 🔒";
 
     li.textContent = text;
     ul.appendChild(li);
   });
 }
-
-
-
-//gestione websocket
-socket.onopen = () => {
-  console.log("✅ Connesso al WebSocket AWS");
-
-  socket.send(JSON.stringify({
-  "action": "lobbylist"
-  }));
-};
-
-// Quando ricevi un messaggio dal server
-socket.onmessage = (event) => {
-  console.log("📨 Messaggio ricevuto:", event.data);
-
-  let data;
-  try {
-    data = JSON.parse(event.data);
-  } catch (e) {
-    console.error("❌ Errore JSON:", e);
-    return;
-  }
-
-  switch (data.action) {
-    case "lobbylist":
-      updateLobbyList(data.lobbies);
-      break;
-  }
-};
-
-// Gestione errori
-socket.onerror = (err) => {
-  console.error("❌ Errore WebSocket:", err);
-};
-
-// Connessione chiusa
-socket.onclose = () => {
-  console.log("🔌 Connessione chiusa");
-};
-
-
