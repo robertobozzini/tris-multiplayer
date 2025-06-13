@@ -14,11 +14,13 @@ function Send(){
   const val=getNickname();
   if(val==null) console.log("errore")
   else {
-    location.href="FindLobby.html"
+    
     socket.send(JSON.stringify({
-    action: "$connect",
+    action: "sendnickname",
     nickname: getNickname()
     }));
+    
+    location.href="FindLobby.html"
   }
 
 }
