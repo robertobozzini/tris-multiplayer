@@ -122,7 +122,10 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("logoutBtn")
     .addEventListener("click", () => {
       localStorage.removeItem("trisNickname");
-      showHomePage();
+      const nickInput = document.getElementById("nickname");
+      nickInput.value = "";
+      nickInput.style.borderColor = "";
+        showHomePage();
     });
 
   // Crea lobby
@@ -130,14 +133,36 @@ window.addEventListener("DOMContentLoaded", () => {
     .addEventListener("click", createLobby);
 
   // 9) Handlers WebSocket
-  socket.addEventListener("open", () => {
-    console.log("✅ [WebSocket] Aperta (readyState =", socket.readyState, ")");
-    const saved = localStorage.getItem("trisNickname");
-    if (saved) {
-      console.log("→ Nick salvato:", saved, "→ showLobbyPage");
-      showLobbyPage(saved);
+  socket.addEventListener("message", event => {
+    const raw = event.data;
+
+    // 1) Salta messaggi vuoti o di ping
+    if (!raw || raw.trim() === "") {
+      return;
     }
+
+    // 2) Prova a fare il parse in sicurezza
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch (e) {
+      console.warn("⚠️ [onmessage] JSON non valido, skip:", raw);
+      return;
+    }
+
+    console.log("→ [parsed data]:", data);
+
+    // 3) Ora gestisci le lobbies se esistono
+    if (Array.isArray(data.lobbies)) {
+      updateLobbyList(data.lobbies);
+    }
+    // eventuale fallback se il server utilizza un altro campo:
+    else if (Array.isArray(data.lobby_list)) {
+      updateLobbyList(data.lobby_list);
+    }
+    // … gestisci qui altri tipi di messaggi …
   });
+
 
   socket.addEventListener("message", event => {
     console.log("⚡ [WebSocket message] raw:", event.data);
