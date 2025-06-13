@@ -22,7 +22,11 @@ function Send() {
     socket.send(JSON.stringify({
       "action": "sendnickname",
       "nickname": val
-    }))};
+    }))
+    document.getElementById("homePage").style.display = "none";
+    document.getElementById("lobbyPage").style.display = "block";   
+    document.getElementById("userNickname").textContent = val;
+  };
 }
 
 //gestione websocket

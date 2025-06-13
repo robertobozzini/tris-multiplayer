@@ -21,7 +21,18 @@
 
   <!-- SEZIONE LOBBY -->
   <section id="lobbyPage" style="display: none;">
+    <main>
+    <h2>Benvenuto in Lobby</h2>
+    <p>Sei connesso come: <span id="userNickname"></span></p>
 
+    <h3>Lista delle lobby disponibili</h3>
+    <ul id="lobbyList">
+      <!-- Lobby saranno aggiunte dinamicamente qui -->
+    </ul>
+
+    <input id="newLobbyName" placeholder="Nome nuova lobby" />
+    <button onclick="createLobby()">Crea Lobby</button>
+    </main>
   </section>
 
   <!-- SEZIONE PARTITA -->
