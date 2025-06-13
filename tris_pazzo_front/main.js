@@ -36,9 +36,15 @@ function updateLobbyList(lobbies) {
   lobbies.forEach(lobby => {
     const li = document.createElement("li");
 
+    // Estrai i valori dal singolo oggetto
+    const name       = lobby.lobby_name || "—";
+    const players    = lobby.players ?? 0;
+    const status     = lobby.status || "sconosciuto";
+    const isPrivate  = lobby.private == 1;  // o true/false a seconda della tua Lambda
+
     // Costruisci la stringa monoriga
-    let text = `${lobby.lobby_name} – ${lobby.players}/2 giocatori`;
-    if (lobby.private==1) {
+    let text = `${name} – ${players} giocatori – ${status}`;
+    if (isPrivate) {
       text += " – 🔒";
     }
 
