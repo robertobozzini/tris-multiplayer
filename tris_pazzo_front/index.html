@@ -1,19 +1,31 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tris Multiplayer</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <main>
-    <h1>Tris Multiplayer!</h1>
-    <p>Inserisci il tuo nickname per iniziare:</p>
 
-    <input type="text" id="nickname" placeholder="Es. Player123" />
-    <button id="botInvia" onclick="Send()">invia</button>
-  </main>
+<body>
+  <!-- SEZIONE HOME -->
+  <section id="homePage">
+    <main>
+      <h1>Tris Multiplayer!</h1>
+      <p>Inserisci il tuo nickname per iniziare:</p>
+      <input type="text" id="nickname" placeholder="Es. Player123" />
+      <button onclick="Send()">Invia</button>
+    </main>
+  </section>
+
+  <!-- SEZIONE LOBBY -->
+  <section id="lobbyPage" style="display: none;">
+
+  </section>
+
+  <!-- SEZIONE PARTITA -->
+  <section id="gamePage" style="display: none;">
+  </section>
 
   <script src="main.js"></script>
 </body>

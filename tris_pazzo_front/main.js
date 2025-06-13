@@ -1,4 +1,4 @@
-const socket = new WebSocket("wss://uc4cu1bz76.execute-api.eu-north-1.amazonaws.com");
+const socket = new WebSocket("wss://uc4cu1bz76.execute-api.eu-north-1.amazonaws.com/production");
 
 function getNickname() {
   const nick = document.getElementById("nickname").value.trim();
@@ -10,21 +10,29 @@ function getNickname() {
   return nick;
 }
 
-function Send(){
-  const val=getNickname();
-  if(val==null) console.log("errore")
-  else {
-    
-    socket.send(JSON.stringify({
-    action: "sendnickname",
-    nickname: getNickname()
-    }));
-    
-    location.href="FindLobby.html"
+function Send() {
+  const val = getNickname();
+  if (val == null) {
+    console.log("errore");
+    return;
   }
 
+  if (socket.readyState === WebSocket.OPEN) {
+    console.log(val)
+    socket.send(JSON.stringify({
+      "action": "sendnickname",
+      "nickname": val
+    }));
+  } else if (socket.readyState === WebSocket.CONNECTING) {
+    console.warn("⚠️ WebSocket in connessione... aspetta");
+    // opzionale: ritenta tra 100ms
+    setTimeout(Send, 100);
+  } else {
+    console.error("❌ WebSocket non disponibile. Stato:", socket.readyState);
+  }
 }
 
+//gestione websocket
 socket.onopen = () => {
   console.log("✅ Connesso al WebSocket AWS");
 };

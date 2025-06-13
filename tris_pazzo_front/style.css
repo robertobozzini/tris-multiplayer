@@ -25,7 +25,8 @@ main {
   background-color: #fff; /* sfondo bianco per contrasto */
   color: #000;
   padding: 2rem;
-  z-index: 1;
+  position: relative;
+  z-index: 2;
   border-radius: 12px;
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
   width: 90%;
