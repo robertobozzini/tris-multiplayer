@@ -28,9 +28,11 @@ main {
   margin:auto;
   background-color: #fff; /* sfondo bianco per contrasto */
   color: #000;
-
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   padding: 2rem;
-  position: relative;
   z-index: 2;
   justify-content: center;
   border-radius: 12px;
