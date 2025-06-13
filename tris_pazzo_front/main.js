@@ -18,6 +18,8 @@ window.addEventListener("DOMContentLoaded", () => {
     logoutBtn.addEventListener("click", () => {
       localStorage.removeItem("trisNickname");
       askedOnce=false;
+      const nickInput = document.getElementById("nickname");
+      if (nickInput) nickInput.value = "";
       showHomePage();
     });
   }
@@ -42,10 +44,9 @@ function initSocket(onOpenCallback) {
   socket.onmessage = event => {
     console.log("messaggio arrivato")
     let data;
-    console.log(data)
     try { data = JSON.parse(event.data); }
     catch { return; }
-
+    console.log(data)
     if (data.action === "lobbylist") {
       updateLobbyList(data.lobbies);
     }
