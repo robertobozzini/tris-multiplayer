@@ -52,6 +52,26 @@ main {
   border-radius: 8px;
   background-color: white;
   color: black;
+  z-index: 2;
+}
+
+#logoutBtn {
+  position: absolute;
+  top: 50px;         /* regola questo valore se serve */
+  left: 10px;
+  font-weight: bold;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  border: 1px solid white;
+  border-radius: 8px;
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  z-index: 2;
+}
+
+#logoutBtn:hover {
+  background-color: #f0f0f0;
 }
 
 #title{

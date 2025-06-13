@@ -1,5 +1,64 @@
 const socket = new WebSocket("wss://uc4cu1bz76.execute-api.eu-north-1.amazonaws.com/production");
 
+window.addEventListener("DOMContentLoaded", () => {
+  const nick = localStorage.getItem("trisNickname");
+  if (nick) {
+    // Se c'è un nickname salvato, vado direttamente in lobby
+    initSocket(() => showLobbyPage(nick));
+  } else {
+    // Altrimenti rimango in home
+    showHomePage();
+    initSocket();
+  }
+});
+
+function initSocket(onOpenCallback) {
+  socket.onopen = () => {
+    console.log("✅ Connesso al WebSocket AWS");
+    if (onOpenCallback) onOpenCallback();
+  };
+
+  socket.onmessage = event => {
+    let data;
+    try { data = JSON.parse(event.data); }
+    catch { return; }
+
+    if (data.action === "lobbylist") {
+      updateLobbyList(data.lobbies);
+    }
+  };
+
+  socket.onerror = err => console.error("❌ Errore WS:", err);
+  socket.onclose = () => console.log("🔌 Connessione chiusa");
+}
+
+function showHomePage() {
+  document.getElementById("homePage").style.display  = "block";
+  document.getElementById("lobbyPage").style.display = "none";
+}
+
+function showLobbyPage(nick) {
+  document.getElementById("homePage").style.display  = "none";
+  document.getElementById("lobbyPage").style.display = "block";
+  document.getElementById("nicknameDisplay").textContent = nick;
+
+  // Chiedo subito la lista
+  socket.send(JSON.stringify({ action: "lobbylist" }));
+}
+
+//logout
+document.addEventListener("DOMContentLoaded", () => {
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      // Rimuove il nickname dallo storage
+      localStorage.removeItem("trisNickname");
+      // Torna alla home
+      showHomePage()
+    });
+  }
+});
+
 function getNickname() {
   const nick = document.getElementById("nickname").value.trim();
   if (!nick) {
@@ -23,9 +82,8 @@ function Send() {
       "action": "sendnickname",
       "nickname": val
     }))
-    document.getElementById("homePage").style.display = "none";
-    document.getElementById("lobbyPage").style.display = "block";   
-    document.getElementById("nicknameDisplay").textContent = val;
+    localStorage.setItem("trisNickname", val);
+    showLobbyPage(val);
   };
 }
 
