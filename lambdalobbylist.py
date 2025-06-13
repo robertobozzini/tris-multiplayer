@@ -14,10 +14,14 @@ def lambda_handler(event, context):
     # Costruisce la lista di lobby con i campi desiderati
     lobbies = []
     for item in items:
+        pw=item.get("password")
+        if(pw==""): val=0
+        else: val=1
         lobby = {
             "lobby_name": item.get("lobby_name"),
             "players": item.get("players"),
-            "status": item.get("status")
+            "status": item.get("status"),
+            "private":val
         }
         lobbies.append(lobby)
         
