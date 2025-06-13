@@ -113,89 +113,101 @@ function createLobby() {
 
 // 8) Setup al caricamento pagina
 window.addEventListener("DOMContentLoaded", () => {
-  // Invio nickname (pulsante e tasto Invio)
-  document.querySelector("#homePage button").addEventListener("click", Send);
-  document.getElementById("nickname")
-    .addEventListener("keypress", e => { if (e.key === "Enter") Send(); });
 
-  // Logout
+  // ————— 1) INVIO NICKNAME —————
+  document.querySelector("#homePage button")
+    .addEventListener("click", Send);
+  document.getElementById("nickname")
+    .addEventListener("keypress", e => {
+      if (e.key === "Enter") Send();
+    });
+
+  // ————— 2) LOGOUT —————
   document.getElementById("logoutBtn")
     .addEventListener("click", () => {
       localStorage.removeItem("trisNickname");
       const nickInput = document.getElementById("nickname");
+      socket.send(JSON.stringify({
+        action: "logout",
+        }));
       nickInput.value = "";
       nickInput.style.borderColor = "";
-        showHomePage();
+      showHomePage();
     });
 
-  // Crea lobby
+  // ————— 3) CREA LOBBY —————
   document.querySelector("#createLobby button")
     .addEventListener("click", createLobby);
 
-  // 9) Handlers WebSocket
-  socket.addEventListener("message", event => {
-    const raw = event.data;
-
-    // 1) Salta messaggi vuoti o di ping
-    if (!raw || raw.trim() === "") {
-      return;
-    }
-
-    // 2) Prova a fare il parse in sicurezza
-    let data;
-    try {
-      data = JSON.parse(raw);
-    } catch (e) {
-      console.warn("⚠️ [onmessage] JSON non valido, skip:", raw);
-      return;
-    }
-
-    console.log("→ [parsed data]:", data);
-
-    // 3) Ora gestisci le lobbies se esistono
-    if (Array.isArray(data.lobbies)) {
-      updateLobbyList(data.lobbies);
-    }
-    // eventuale fallback se il server utilizza un altro campo:
-    else if (Array.isArray(data.lobby_list)) {
-      updateLobbyList(data.lobby_list);
-    }
-    // … gestisci qui altri tipi di messaggi …
-  });
-
-
-  socket.addEventListener("message", event => {
-    console.log("⚡ [WebSocket message] raw:", event.data);
-    let data;
-    try {
-      data = JSON.parse(event.data);
-    } catch (e) {
-      console.error("❌ [message] JSON.parse fallito:", e);
-      return;
-    }
-    console.log("→ [parsed data]:", data);
-
-    // Se il server usa un campo diverso da "lobbies", mostralo qui:
-    if (data.lobbies) {
-      updateLobbyList(data.lobbies);
-    }
-    else if (data.lobby_list) {
-      console.warn("⚠️ [message] Server usa 'lobby_list' invece di 'lobbies'");
-      updateLobbyList(data.lobby_list);
-    }
-    else {
-      console.log("ℹ️ [message] Azione:", data.action, "| Nessuna lista da aggiornare");
+  // ————— 4) HANDLER WEBSOCKET —————
+  socket.addEventListener("open", () => {
+    console.log("✅ WebSocket aperta");
+    const saved = localStorage.getItem("trisNickname");
+    if (saved) {
+      // se c'è un nick salvato, entri in lobby subito
+      showLobbyPage(saved);
     }
   });
 
-  socket.addEventListener("error", err => {
-    console.error("❌ [WebSocket error]:", err);
-  });
+  // Unico listener per tutti i message
+  socket.addEventListener("message", handleSocketMessage);
 
-  socket.addEventListener("close", () => {
-    console.log("🔌 [WebSocket] Chiusa");
-  });
+  socket.addEventListener("error", err =>
+    console.error("❌ WebSocket error:", err)
+  );
+  socket.addEventListener("close", () =>
+    console.log("🔌 WebSocket chiusa")
+  );
 
-  // 10) Inizio in home
+  // ————— 5) BOOTSTRAP INIZIALE —————
+const savedNick = localStorage.getItem("trisNickname");
+if (savedNick) {
+  if (socket.readyState === WebSocket.OPEN) {
+    // 1. Mostra subito la lobby
+    showLobbyPage(savedNick);
+    // 2. Reinvia il nickname al server
+    socket.send(JSON.stringify({
+      action: "sendnickname",
+      nickname: savedNick
+    }));
+  } else {
+    // Se il socket non è ancora aperto, aspetta e poi esegui entrambi
+    socket.addEventListener("open", () => {
+      showLobbyPage(savedNick);
+      socket.send(JSON.stringify({
+        action: "sendnickname",
+        nickname: savedNick
+      }));
+    }, { once: true });
+  }
+} else {
   showHomePage();
+}
+
 });
+
+// ————— Funzione centralizzata per i message —————
+function handleSocketMessage(event) {
+  const raw = event.data;
+  if (!raw || raw.trim() === "") return;
+
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch (e) {
+    console.warn("⚠️ JSON non valido, skip:", raw);
+    return;
+  }
+  console.log("→ [parsed data]:", data);
+
+  if (Array.isArray(data.lobbies)) {
+    updateLobbyList(data.lobbies);
+  }
+  else if (Array.isArray(data.lobby_list)) {
+    updateLobbyList(data.lobby_list);
+  }
+  else {
+    console.log("ℹ️ Azione:", data.action, "| nessuna lista da aggiornare");
+  }
+}
+
