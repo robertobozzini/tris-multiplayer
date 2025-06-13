@@ -22,14 +22,7 @@ function Send() {
     socket.send(JSON.stringify({
       "action": "sendnickname",
       "nickname": val
-    }));
-  } else if (socket.readyState === WebSocket.CONNECTING) {
-    console.warn("⚠️ WebSocket in connessione... aspetta");
-    // opzionale: ritenta tra 100ms
-    setTimeout(Send, 100);
-  } else {
-    console.error("❌ WebSocket non disponibile. Stato:", socket.readyState);
-  }
+    }))};
 }
 
 //gestione websocket
