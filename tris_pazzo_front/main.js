@@ -50,12 +50,14 @@ function updateLobbyList(lobbies) {
             return;
           }
           passwordInput.style.borderColor = "#ccc"; // reset
-          document.getElementById("passwordModal").style.display = "none";
+
           socket.send(JSON.stringify({
-            action: "sendnickname",
+            action: "joinlobby",
             lobby_name: lobby.lobby_name,
             password: pwd
           }));
+
+          document.getElementById("passwordModal").style.display = "none";
         };
 
         // Quando l’utente modifica il campo, resetta il bordo
@@ -72,7 +74,7 @@ function updateLobbyList(lobbies) {
           confirmJoinBtn.click();
         }
         });
-        
+
       } else {
         socket.send(JSON.stringify({
           action: "sendickname",
@@ -148,9 +150,9 @@ function createLobby() {
   input.style.borderColor = "";
   console.log("⟳ [createLobby] Invio { action: 'createlobby', lobby:", name, "}");
   socket.send(JSON.stringify({
-    action: "sendnickname",
-    nick: getNickname(),
-    lobby: name,
+    action: "lobby",
+    player1: getNickname(),
+    lobby_name: name,
     password: pwd
   }));
 }
@@ -212,7 +214,9 @@ if (savedNick) {
     // 2. Reinvia il nickname al server
     socket.send(JSON.stringify({
       action: "sendnickname",
-      nickname: savedNick
+      nickname: savedNick,
+      lobby_name: "",
+      lobby_pass: ""
     }));
   } else {
     // Se il socket non è ancora aperto, aspetta e poi esegui entrambi
@@ -220,7 +224,9 @@ if (savedNick) {
       showLobbyPage(savedNick);
       socket.send(JSON.stringify({
         action: "sendnickname",
-        nickname: savedNick
+        nickname: savedNick,
+        lobby_name: "",
+        lobby_pass: ""
       }));
     }, { once: true });
   }
@@ -243,6 +249,32 @@ function handleSocketMessage(event) {
     return;
   }
   console.log("→ [parsed data]:", data);
+
+  // Gestione joinlobby
+  if (data.action === "joinlobby") {
+    if (data.success) {
+      // password OK: chiudi modale, vai nella pagina di gioco
+      document.getElementById("passwordModal").style.display = "none";
+      // ad esempio:
+      //showGamePage(data.lobby); // o come gestisci l’avvio partita
+    } else {
+      // password sbagliata: evidenzia l’input e mostra messaggio
+      const pwdInput = document.getElementById("lobbyPasswordInput");
+      pwdInput.style.borderColor = "red";
+      // mostra il messaggio di errore sotto l’input?
+      // let err = document.getElementById("passwordError");
+      // if (!err) {
+      //   err = document.createElement("div");
+      //   err.id = "passwordError";
+      //   err.style.color = "red";
+      //   err.style.marginTop = "0.5rem";
+      //   document.querySelector(".modal-content").appendChild(err);
+      // }
+      // err.textContent = data.message || "Password errata";
+    }
+    return;
+  }
+
 
   if (Array.isArray(data.lobbies)) {
     updateLobbyList(data.lobbies);
