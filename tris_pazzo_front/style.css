@@ -302,3 +302,38 @@ button:hover {
 #logoutBtnUnit:hover, #exitLobbyBtn:hover {
   background-color: #f0f0f0;
 }
+
+
+#lobbyInfoContainer {
+  margin-top: 100px;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#lobbyNameDisplay {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+#playersDisplay {
+  display: flex;
+  justify-content: space-around;
+  gap: 1rem;
+}
+
+.playerBox {
+  flex: 1;
+  padding: 1rem;
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+

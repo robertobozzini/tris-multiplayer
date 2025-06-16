@@ -66,7 +66,7 @@ function updateLobbyList(lobbies) {
 
           socket.send(JSON.stringify({
             action: "joinlobby",
-            player: getNickname(),
+            player: sessionStorage.getItem("trisNickname"),
             lobby_name: lobby.lobby_name,
             password: pwd
           }));
@@ -90,9 +90,16 @@ function updateLobbyList(lobbies) {
         });
 
       } else {
+        console.log(JSON.stringify({
+          action: "joinlobby",
+          player: sessionStorage.getItem("trisNickname"),
+          lobby_name: lobby.lobby_name,
+          password: ""
+        }));
+
         socket.send(JSON.stringify({
           action: "joinlobby",
-          player: getNickname(),
+          player: sessionStorage.getItem("trisNickname"),
           lobby_name: lobby.lobby_name,
           password: ""
         }));
@@ -183,13 +190,21 @@ function createLobby() {
 
   input.style.borderColor = "#ccc";
 
-  console.log("⟳ [createLobby] Invio { action: 'createlobby', lobby:", name, "}");
-  socket.send(JSON.stringify({
+  console.log("⟳ [createLobby] Invio", JSON.stringify({
     action: "lobby",
-    player1: getNickname(),
+    player1: sessionStorage.getItem("trisNickname"),
     lobby_name: name,
     password: pwd
   }));
+
+  socket.send(JSON.stringify({
+    action: "lobby",
+    player1: sessionStorage.getItem("trisNickname"),
+    lobby_name: name,
+    password: pwd
+  }));
+
+
 
   // reset flag dopo un po’, o quando il server risponde  
   setTimeout(() => { lobbyCreating = false; }, 1000);
@@ -252,7 +267,10 @@ window.addEventListener("DOMContentLoaded", () => {
         action: "leavelobby",
         player: nick
       }));
-
+      document.getElementById("nickname").value = "";
+      document.getElementById("nickname").style.borderColor = "";
+      document.getElementById("newLobbyName").value = "";
+      document.getElementById("newLobbyPassword").value = "";
       showLobbyPage(nick);
     }
   });
@@ -353,7 +371,14 @@ function handleSocketMessage(event) {
   if (data.result === "joined") {
     // il server conferma l’entrata
     document.getElementById("passwordModal").style.display = "none";
+  
     showLobbyPageUnit();
+    // Aggiorna il nome della lobby
+    document.getElementById("lobbyNameDisplay").textContent = `Lobby: ${data.lobby}`;
+
+    // Aggiorna i giocatori
+    document.getElementById("player1Box").textContent = data.player1 || "In attesa...";
+    document.getElementById("player2Box").textContent = data.player2 || "In attesa...";
     return;
   }
   else if (data.result === "error") {
