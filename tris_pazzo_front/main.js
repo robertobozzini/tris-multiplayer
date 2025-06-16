@@ -5,6 +5,18 @@ const socket = new WebSocket("wss://uc4cu1bz76.execute-api.eu-north-1.amazonaws.
 
 // Variabili globali
 let lobbyInterval = null;
+let lobbyCreating = false;
+
+
+let currentFilter = "";  // terrà traccia del testo da filtrare
+function applyFilter() {
+  document.querySelectorAll("#lobbyList li").forEach(li => {
+    li.style.display = li.textContent.toLowerCase().includes(currentFilter)
+      ? ""
+      : "none";
+  });
+}
+
 
 // 2) Richiesta lista lobby (sempre, quando il WS è OPEN)
 function requestLobbies() {
@@ -37,6 +49,7 @@ function updateLobbyList(lobbies) {
     li.style.cursor = "pointer";
     li.addEventListener("click", () => {
       console.log("→ click JOIN", lobby.lobby_name);
+      if(lobby.players==2) return
       if (lobby.private === '1') {
         // Mostra il modal per la password
         document.getElementById("passwordModal").style.display = "flex";
@@ -53,11 +66,12 @@ function updateLobbyList(lobbies) {
 
           socket.send(JSON.stringify({
             action: "joinlobby",
+            player: getNickname(),
             lobby_name: lobby.lobby_name,
             password: pwd
           }));
 
-          document.getElementById("passwordModal").style.display = "none";
+          
         };
 
         // Quando l’utente modifica il campo, resetta il bordo
@@ -77,7 +91,8 @@ function updateLobbyList(lobbies) {
 
       } else {
         socket.send(JSON.stringify({
-          action: "sendickname",
+          action: "joinlobby",
+          player: getNickname(),
           lobby_name: lobby.lobby_name,
           password: ""
         }));
@@ -85,6 +100,7 @@ function updateLobbyList(lobbies) {
     });
     ul.appendChild(li);
   });
+  applyFilter()
 }
 
 // 4) Mostra/nascondi sezioni
@@ -93,18 +109,31 @@ function showHomePage() {
   document.getElementById("homePage").style.display  = "block";
   document.getElementById("lobbyPage").style.display = "none";
   document.getElementById("gamePage").style.display  = "none";
+  document.getElementById("lobbyPageUnit").style.display = "none";
 }
 
 function showLobbyPage(nick) {
   document.getElementById("homePage").style.display  = "none";
+  document.getElementById("lobbyPageUnit").style.display = "none";
   document.getElementById("lobbyPage").style.display = "block";
   document.getElementById("gamePage").style.display  = "none";
   document.getElementById("nicknameDisplay").textContent = nick;
 
   // richiesta immediata + polling ogni 10s
   requestLobbies();
-  lobbyInterval = setInterval(requestLobbies, 10000);
+  //lobbyInterval = setInterval(requestLobbies, 5000);
 }
+
+function showLobbyPageUnit(nick, lobbyName){
+  document.getElementById("lobbyPageUnit").style.display = "block";
+  document.getElementById("homePage").style.display  = "none";
+  document.getElementById("lobbyPage").style.display = "none";
+  document.getElementById("gamePage").style.display  = "none";
+  document.getElementById("nicknameDisplay").textContent = nick;
+  document.getElementById("nicknameDisplayUnit").textContent = nick;
+  document.getElementById("currentLobbyName").textContent = lobbyName;
+}
+
 
 // 5) Ottieni nickname dall’input
 function getNickname() {
@@ -127,8 +156,6 @@ function Send() {
     socket.send(JSON.stringify({
       action: "sendnickname",
       nickname: nick,
-      lobby_name: "",
-      lobby_pass: ""
     }));
     sessionStorage.setItem("trisNickname", nick);
     showLobbyPage(nick);
@@ -140,14 +167,21 @@ function Send() {
 
 // 7) Creazione nuova lobby
 function createLobby() {
-  const input = document.getElementById("newLobbyName")
-  const name = document.getElementById("newLobbyName").value.trim();
+  if (lobbyCreating) return; // evita doppio invio
+  lobbyCreating = true;
+
+  const input = document.getElementById("newLobbyName");
+  const name = input.value.trim();
   const pwd  = document.getElementById("newLobbyPassword").value;
+
   if (!name) {
     input.style.borderColor = "red";
-    return null;
+    lobbyCreating = false;
+    return;
   }
-  input.style.borderColor = "";
+
+  input.style.borderColor = "#ccc";
+
   console.log("⟳ [createLobby] Invio { action: 'createlobby', lobby:", name, "}");
   socket.send(JSON.stringify({
     action: "lobby",
@@ -155,7 +189,11 @@ function createLobby() {
     lobby_name: name,
     password: pwd
   }));
+
+  // reset flag dopo un po’, o quando il server risponde  
+  setTimeout(() => { lobbyCreating = false; }, 1000);
 }
+
 
 // 8) Setup al caricamento pagina
 window.addEventListener("DOMContentLoaded", () => {
@@ -178,12 +216,48 @@ window.addEventListener("DOMContentLoaded", () => {
         }));
       nickInput.value = "";
       nickInput.style.borderColor = "";
+      document.getElementById("newLobbyName").value = "";
+    document.getElementById("newLobbyPassword").value = "";
       showHomePage();
     });
 
+  document.getElementById("exitLobbyBtn").addEventListener("click", () => {
+    socket.send(JSON.stringify({
+      action: "leavelobby",
+      player: getNickname()
+    }));
+    showLobbyPage(getNickname());
+  });
+
+
   // ————— 3) CREA LOBBY —————
+  const newLobbyNameInput = document.getElementById("newLobbyName");
+  newLobbyNameInput.addEventListener("input", () => {
+  newLobbyNameInput.style.borderColor = "#ccc"; // oppure "" per tornare al CSS
+  });
+  newLobbyNameInput.addEventListener("keypress", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      createLobby();
+    }
+  });
   document.querySelector("#createLobby button")
     .addEventListener("click", createLobby);
+
+  //filtro
+  const searchInput = document.getElementById("searchLobby");
+  searchInput.addEventListener("input", () => {
+    currentFilter = searchInput.value.trim().toLowerCase();
+    applyFilter();
+  });
+
+  const newLobbyPassInput = document.getElementById("newLobbyPassword");
+  newLobbyPassInput.addEventListener("keypress", e => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    createLobby();
+  }
+  });
 
   // ————— 4) HANDLER WEBSOCKET —————
   socket.addEventListener("open", () => {
@@ -215,8 +289,6 @@ if (savedNick) {
     socket.send(JSON.stringify({
       action: "sendnickname",
       nickname: savedNick,
-      lobby_name: "",
-      lobby_pass: ""
     }));
   } else {
     // Se il socket non è ancora aperto, aspetta e poi esegui entrambi
@@ -225,8 +297,6 @@ if (savedNick) {
       socket.send(JSON.stringify({
         action: "sendnickname",
         nickname: savedNick,
-        lobby_name: "",
-        lobby_pass: ""
       }));
     }, { once: true });
   }
@@ -250,28 +320,20 @@ function handleSocketMessage(event) {
   }
   console.log("→ [parsed data]:", data);
 
+
   // Gestione joinlobby
-  if (data.action === "joinlobby") {
-    if (data.success) {
-      // password OK: chiudi modale, vai nella pagina di gioco
-      document.getElementById("passwordModal").style.display = "none";
-      // ad esempio:
-      //showGamePage(data.lobby); // o come gestisci l’avvio partita
-    } else {
-      // password sbagliata: evidenzia l’input e mostra messaggio
-      const pwdInput = document.getElementById("lobbyPasswordInput");
-      pwdInput.style.borderColor = "red";
-      // mostra il messaggio di errore sotto l’input?
-      // let err = document.getElementById("passwordError");
-      // if (!err) {
-      //   err = document.createElement("div");
-      //   err.id = "passwordError";
-      //   err.style.color = "red";
-      //   err.style.marginTop = "0.5rem";
-      //   document.querySelector(".modal-content").appendChild(err);
-      // }
-      // err.textContent = data.message || "Password errata";
-    }
+  if (data.result === "joined") {
+    // il server conferma l’entrata
+    document.getElementById("passwordModal").style.display = "none";
+    showLobbyPageUnit(getNickname(), data.lobby);
+    return;
+  }
+  else if (data.result === "error") {
+    // il server segnala un errore (es. password sbagliata)
+    const pwdInput = document.getElementById("lobbyPasswordInput");
+    pwdInput.style.borderColor = "red";
+    // facoltativo: mostra data.message come alert o sotto l’input
+    //alert(data.message || "Errore durante l’accesso alla lobby");
     return;
   }
 

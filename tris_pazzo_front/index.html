@@ -34,12 +34,23 @@
       
       <div>      
         <h2>Unisciti ad una lobby</h2>
+        <div id="searchContainer">
+          <input type="text" id="searchLobby" placeholder="Cerca lobby…" />
+        </div>
         <ul id="lobbyList">
           
         </ul>
       </div>
     </main>
   </section>
+
+    <!-- SEZIONE LOBBY -->
+  <section id="lobbyPageUnit" style="display: none; z-index: 3;">
+    <h2>Lobby: <span id="currentLobbyName"></span></h2>
+    <p>Benvenuto, <span id="nicknameDisplayUnit"></span></p>
+    <button id="exitLobbyBtn">Esci dalla Lobby</button>
+  </section>
+
 
   <!-- SEZIONE PARTITA -->
   <section id="gamePage" style="display: none;">
