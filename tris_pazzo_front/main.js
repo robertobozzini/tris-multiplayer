@@ -87,7 +87,8 @@ function Send() {
       action: "sendnickname",
       nickname: nick
     }));
-    localStorage.setItem("trisNickname", nick);
+    sessionStorage.setItem("trisNickname", nick);
+    sessionStorage.setItem("trisLoginTime", Date.now());
     showLobbyPage(nick);
   } else {
     console.log("⚠️ [Send] WebSocket non aperta, riprovo fra un momento");
@@ -125,7 +126,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // ————— 2) LOGOUT —————
   document.getElementById("logoutBtn")
     .addEventListener("click", () => {
-      localStorage.removeItem("trisNickname");
+      sessionStorage.removeItem("trisNickname");
       const nickInput = document.getElementById("nickname");
       socket.send(JSON.stringify({
         action: "logout",
@@ -142,7 +143,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // ————— 4) HANDLER WEBSOCKET —————
   socket.addEventListener("open", () => {
     console.log("✅ WebSocket aperta");
-    const saved = localStorage.getItem("trisNickname");
+    const saved = sessionStorage.getItem("trisNickname");
     if (saved) {
       // se c'è un nick salvato, entri in lobby subito
       showLobbyPage(saved);
@@ -160,18 +161,19 @@ window.addEventListener("DOMContentLoaded", () => {
   );
 
   // ————— 5) BOOTSTRAP INIZIALE —————
-const savedNick = localStorage.getItem("trisNickname");
-if (savedNick) {
+const savedNick = sessionStorage.getItem("trisNickname");
+const loginTime = parseInt(sessionStorage.getItem("trisLoginTime"), 10);
+const now = Date.now();
+
+// Se il nick esiste E il login è recente (< 60 secondi fa)
+if (savedNick && loginTime && now - loginTime < 60000) {
   if (socket.readyState === WebSocket.OPEN) {
-    // 1. Mostra subito la lobby
     showLobbyPage(savedNick);
-    // 2. Reinvia il nickname al server
     socket.send(JSON.stringify({
       action: "sendnickname",
       nickname: savedNick
     }));
   } else {
-    // Se il socket non è ancora aperto, aspetta e poi esegui entrambi
     socket.addEventListener("open", () => {
       showLobbyPage(savedNick);
       socket.send(JSON.stringify({
@@ -181,6 +183,9 @@ if (savedNick) {
     }, { once: true });
   }
 } else {
+  // Dati scaduti o assenti → rimuovo tutto e torno alla home
+  sessionStorage.removeItem("trisNickname");
+  sessionStorage.removeItem("trisLoginTime");
   showHomePage();
 }
 
