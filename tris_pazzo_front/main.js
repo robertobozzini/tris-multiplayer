@@ -124,15 +124,16 @@ function showLobbyPage(nick) {
   //lobbyInterval = setInterval(requestLobbies, 5000);
 }
 
-function showLobbyPageUnit(nick, lobbyName){
-  document.getElementById("lobbyPageUnit").style.display = "block";
-  document.getElementById("homePage").style.display  = "none";
+function showLobbyPageUnit() {
+  document.getElementById("homePage").style.display = "none";
   document.getElementById("lobbyPage").style.display = "none";
-  document.getElementById("gamePage").style.display  = "none";
-  document.getElementById("nicknameDisplay").textContent = nick;
+  document.getElementById("gamePage").style.display = "none";
+  document.getElementById("lobbyPageUnit").style.display = "block";
+
+  const nick = sessionStorage.getItem("trisNickname");
   document.getElementById("nicknameDisplayUnit").textContent = nick;
-  document.getElementById("currentLobbyName").textContent = lobbyName;
 }
+
 
 
 // 5) Ottieni nickname dall’input
@@ -207,26 +208,53 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
   // ————— 2) LOGOUT —————
-  document.getElementById("logoutBtn")
-    .addEventListener("click", () => {
-      sessionStorage.removeItem("trisNickname");
-      const nickInput = document.getElementById("nickname");
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    const nick = sessionStorage.getItem("trisNickname");
+    if (nick) {
       socket.send(JSON.stringify({
         action: "logout",
-        }));
-      nickInput.value = "";
-      nickInput.style.borderColor = "";
-      document.getElementById("newLobbyName").value = "";
+        player: nick
+      }));
+    }
+    sessionStorage.removeItem("trisNickname");
+    // Pulizia input
+    document.getElementById("nickname").value = "";
+    document.getElementById("nickname").style.borderColor = "";
+    document.getElementById("newLobbyName").value = "";
     document.getElementById("newLobbyPassword").value = "";
-      showHomePage();
-    });
+
+    showHomePage();
+  });
+
+  document.getElementById("logoutBtnUnit").addEventListener("click", () => {
+    const nick = sessionStorage.getItem("trisNickname");
+    if (nick) {
+      socket.send(JSON.stringify({
+        action: "logout",
+        player: nick
+      }));
+    }
+    sessionStorage.removeItem("trisNickname");
+    // Pulizia input
+    document.getElementById("nickname").value = "";
+    document.getElementById("nickname").style.borderColor = "";
+    document.getElementById("newLobbyName").value = "";
+    document.getElementById("newLobbyPassword").value = "";
+
+    showHomePage();
+  });
 
   document.getElementById("exitLobbyBtn").addEventListener("click", () => {
-    socket.send(JSON.stringify({
-      action: "leavelobby",
-      player: getNickname()
-    }));
-    showLobbyPage(getNickname());
+    const nick = sessionStorage.getItem("trisNickname");
+
+    if (nick) {
+      socket.send(JSON.stringify({
+        action: "leavelobby",
+        player: nick
+      }));
+
+      showLobbyPage(nick);
+    }
   });
 
 
@@ -325,7 +353,7 @@ function handleSocketMessage(event) {
   if (data.result === "joined") {
     // il server conferma l’entrata
     document.getElementById("passwordModal").style.display = "none";
-    showLobbyPageUnit(getNickname(), data.lobby);
+    showLobbyPageUnit();
     return;
   }
   else if (data.result === "error") {
