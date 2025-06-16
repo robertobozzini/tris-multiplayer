@@ -120,22 +120,22 @@ button:hover {
 .lobbiesMain{
   margin-top: 0px auto;
   z-index: 3;
-  position: relative; /* o relative, ma NON absolute */
+  position: relative; 
 }
 
 #createLobby{
   margin-bottom: 50px;
 }
 
-/* Override per la pagina lobby: il main non è più assoluto né centrato via transform */
+
 #lobbyPage .lobbiesMain {
-  position: static !important;      /* non usa più absolute */
-  transform: none !important;       /* niente translate centering */
-  margin: 50px auto 0 auto;         /* top spacing, centrato orizzontalmente */
+  position: static !important;      
+  transform: none !important;       
+  margin: 50px auto 0 auto;         
   width: 95%;
   max-width: 1200px;
-  max-height: none;                 /* limite in altezza */
-  overflow-y: visible;                 /* scroll verticale se cresce troppo */
+  max-height: none;                
+  overflow-y: visible;                 
   padding: 1rem;
   background-color: #fff;
   border-radius: 12px;
@@ -202,4 +202,57 @@ button:hover {
   #logoutBtn {
     top: 40px;
   }
+}
+
+/*mostra password per joinare priv*/
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6); /* sfondo scuro */
+  display: none; /* nascosto di default */
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  width: 90%;
+  max-width: 350px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #1e90ff;
+  color: white;
+  cursor: pointer;
+}
+
+.modal-buttons button:hover {
+  background-color: #0d6efd;
 }

@@ -33,14 +33,53 @@ function updateLobbyList(lobbies) {
     console.log("· lobby:", lobby);
     const li = document.createElement("li");
     const isPrivate = lobby.private === '1' ? "🔒" : "";
-    li.textContent = `${lobby.lobby_name} – ${lobby.players} giocatori – ${lobby.stato} ${isPrivate}`;
+    li.textContent = `${lobby.lobby_name} – ${lobby.players}/2 giocatori – ${lobby.stato} ${isPrivate}`;
     li.style.cursor = "pointer";
     li.addEventListener("click", () => {
       console.log("→ click JOIN", lobby.lobby_name);
-      socket.send(JSON.stringify({
-        action: "joinlobby",
-        lobby: lobby.lobby_name
-      }));
+      if (lobby.private === '1') {
+        // Mostra il modal per la password
+        document.getElementById("passwordModal").style.display = "flex";
+        document.getElementById("lobbyPasswordInput").value = ""; // reset campo
+        const passwordInput = document.getElementById("lobbyPasswordInput");
+
+        document.getElementById("confirmJoinBtn").onclick = () => {
+          const pwd = passwordInput.value.trim();
+          if (!pwd) {
+            passwordInput.style.borderColor = "red";
+            return;
+          }
+          passwordInput.style.borderColor = "#ccc"; // reset
+          document.getElementById("passwordModal").style.display = "none";
+          socket.send(JSON.stringify({
+            action: "sendnickname",
+            lobby_name: lobby.lobby_name,
+            password: pwd
+          }));
+        };
+
+        // Quando l’utente modifica il campo, resetta il bordo
+        passwordInput.addEventListener("input", () => {
+          passwordInput.style.borderColor = "#ccc";
+        });
+
+        document.getElementById("cancelJoinBtn").onclick = () => {
+          document.getElementById("passwordModal").style.display = "none";
+        };
+
+        passwordInput.addEventListener("keypress", e => {
+        if (e.key === "Enter") {
+          confirmJoinBtn.click();
+        }
+        });
+        
+      } else {
+        socket.send(JSON.stringify({
+          action: "sendickname",
+          lobby_name: lobby.lobby_name,
+          password: ""
+        }));
+      }
     });
     ul.appendChild(li);
   });
@@ -85,10 +124,11 @@ function Send() {
     console.log("⟳ [Send] Invio { action: 'sendnickname', nickname:", nick, "}");
     socket.send(JSON.stringify({
       action: "sendnickname",
-      nickname: nick
+      nickname: nick,
+      lobby_name: "",
+      lobby_pass: ""
     }));
     sessionStorage.setItem("trisNickname", nick);
-    sessionStorage.setItem("trisLoginTime", Date.now());
     showLobbyPage(nick);
   } else {
     console.log("⚠️ [Send] WebSocket non aperta, riprovo fra un momento");
@@ -98,15 +138,18 @@ function Send() {
 
 // 7) Creazione nuova lobby
 function createLobby() {
+  const input = document.getElementById("newLobbyName")
   const name = document.getElementById("newLobbyName").value.trim();
   const pwd  = document.getElementById("newLobbyPassword").value;
   if (!name) {
-    alert("Devi specificare un nome per la lobby!");
-    return;
+    input.style.borderColor = "red";
+    return null;
   }
+  input.style.borderColor = "";
   console.log("⟳ [createLobby] Invio { action: 'createlobby', lobby:", name, "}");
   socket.send(JSON.stringify({
-    action: "createlobby",
+    action: "sendnickname",
+    nick: getNickname(),
     lobby: name,
     password: pwd
   }));
@@ -162,18 +205,17 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // ————— 5) BOOTSTRAP INIZIALE —————
 const savedNick = sessionStorage.getItem("trisNickname");
-const loginTime = parseInt(sessionStorage.getItem("trisLoginTime"), 10);
-const now = Date.now();
-
-// Se il nick esiste E il login è recente (< 60 secondi fa)
-if (savedNick && loginTime && now - loginTime < 60000) {
+if (savedNick) {
   if (socket.readyState === WebSocket.OPEN) {
+    // 1. Mostra subito la lobby
     showLobbyPage(savedNick);
+    // 2. Reinvia il nickname al server
     socket.send(JSON.stringify({
       action: "sendnickname",
       nickname: savedNick
     }));
   } else {
+    // Se il socket non è ancora aperto, aspetta e poi esegui entrambi
     socket.addEventListener("open", () => {
       showLobbyPage(savedNick);
       socket.send(JSON.stringify({
@@ -183,9 +225,6 @@ if (savedNick && loginTime && now - loginTime < 60000) {
     }, { once: true });
   }
 } else {
-  // Dati scaduti o assenti → rimuovo tutto e torno alla home
-  sessionStorage.removeItem("trisNickname");
-  sessionStorage.removeItem("trisLoginTime");
   showHomePage();
 }
 

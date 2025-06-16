@@ -19,7 +19,7 @@
     </main>
   </section>
 
-  <!-- SEZIONE LOBBY -->
+  <!-- SEZIONE lista LOBBY -->
   <section id="lobbyPage" style="display: none; z-index: 3;">
     <div id="nicknameDisplay"></div>
     <button id="logoutBtn">Logout</button>
@@ -27,7 +27,7 @@
     <main class="lobbiesMain">
       <div id="createLobby" >
         <h2>Crea una lobby</h2>
-        <input id="newLobbyName" placeholder="Nome nuova lobby" />
+        <input id="newLobbyName" placeholder="Nome nuova lobby (max 20 caratteri)" maxlength="20" minlength="1"/>
         <input id="newLobbyPassword" placeholder="Password lobby (facoltativo)" />
         <button onclick="createLobby()">Crea Lobby</button>
       </div>
@@ -38,8 +38,6 @@
           
         </ul>
       </div>
-    
-    
     </main>
   </section>
 
@@ -48,5 +46,20 @@
   </section>
 
   <script src="main.js"></script>
+
+<!-- pop up per inserire la password -->
+  <div id="passwordModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Inserisci la password</h3>
+      <input type="password" id="lobbyPasswordInput" placeholder="Password">
+      <div class="modal-buttons">
+        <button id="confirmJoinBtn">Entra</button>
+        <button id="cancelJoinBtn">Annulla</button>
+      </div>
+    </div>
+  </div>
+
+
+
 </body>
 </html>
