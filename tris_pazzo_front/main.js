@@ -558,7 +558,7 @@ function handleSocketMessage(event) {
   }
   else if (data.result === "ready") {
     const nick = data.player;
-    const isPlayerReady = data.isReady; // usa il valore dal server
+    const isPlayerReady = data.isReady; // questo campo serve!
     const myNick = sessionStorage.getItem("trisNickname");
 
     const isOther = nick !== myNick;
@@ -566,18 +566,26 @@ function handleSocketMessage(event) {
       ? (isOther ? "player2Status" : "player1Status")
       : (isOther ? "player1Status" : "player2Status");
 
+    const buttonId = (myPlayerNumber === 1)
+      ? "player1ReadyBtn"
+      : "player2ReadyBtn";
+
+    // Aggiorna stato visivo
     document.getElementById(statusId).textContent = isPlayerReady ? "✅ Pronto" : "⏳ In attesa";
 
+    // Aggiorna variabili
     if (isOther) {
       otherPlayerReady = isPlayerReady;
+    } else {
+      isReady = isPlayerReady;
+      document.getElementById(buttonId).textContent = isReady ? "Annulla" : "Pronto?";
     }
 
-    if (!isReady || !otherPlayerReady) {
-      stopCountdown();
-    }
-
+    // Countdown logica
     if (isReady && otherPlayerReady) {
       startCountdown();
+    } else {
+      stopCountdown();
     }
   }
   else if (data.result==="Lobby name already taken") {
