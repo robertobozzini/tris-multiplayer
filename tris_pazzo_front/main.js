@@ -518,12 +518,6 @@ function handleSocketMessage(event) {
         richiesta: true
       }));
     }
-    // il server conferma l’entrata
-    socket.send(JSON.stringify({
-    action: "ready",
-    player: sessionStorage.getItem("trisNickname"),
-    richiesta: true
-    }));
     document.getElementById("passwordModal").style.display = "none";
   
     showLobbyPageUnit();
@@ -589,36 +583,27 @@ function handleSocketMessage(event) {
       document.getElementById("player2ReadyBtn").style.display = "inline-block";
     }
   }
-  else if (data.result === "ready") {
+  else if (data.action === "ready") {
     const nick = data.player;
-    const isPlayerReady = data.isReady; 
     const myNick = sessionStorage.getItem("trisNickname");
+    const isPlayerReady = data.isReady ?? true; // fallback per compatibilità
 
     const isOther = nick !== myNick;
-    const statusId = (myPlayerNumber === 1)
+
+    const statusId = myPlayerNumber === 1
       ? (isOther ? "player2Status" : "player1Status")
       : (isOther ? "player1Status" : "player2Status");
 
-    const buttonId = (myPlayerNumber === 1)
-      ? "player1ReadyBtn"
-      : "player2ReadyBtn";
-
-    // Aggiorna stato visivo
     document.getElementById(statusId).textContent = isPlayerReady ? "✅ Pronto" : "⏳ In attesa";
 
-    // Aggiorna variabili
     if (isOther) {
       otherPlayerReady = isPlayerReady;
     } else {
       isReady = isPlayerReady;
-      document.getElementById(buttonId).textContent = isReady ? "Annulla" : "Pronto?";
     }
 
-    // Countdown logica
     if (isReady && otherPlayerReady) {
       startCountdown();
-    } else {
-      stopCountdown();
     }
   }
   else if (data.result==="Lobby name already taken") {
