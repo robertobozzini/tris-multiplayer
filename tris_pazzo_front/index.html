@@ -14,7 +14,7 @@
     <main>
       <h1 id="title">TRIS MULTIPLAYER!</h1>
       <p>Inserisci il tuo nickname per iniziare:</p>
-      <input type="text" id="nickname" placeholder="Es. Player123" />
+      <input type="text" id="nickname" placeholder="Es. Player123 (max 20 caratteri)" maxlength="20" minlength="1"/>
       <button onclick="Send()">Invia</button>
     </main>
   </section>
@@ -53,9 +53,22 @@
     <div id="lobbyInfoContainer">
     <div id="lobbyNameDisplay">Nome Lobby</div>
     <div id="playersDisplay">
-      <div class="playerBox" id="player1Box">Giocatore 1</div>
-      <div class="playerBox" id="player2Box">Giocatore 2</div>
+      <div class="playerBox" id="player1Box">
+        <div class="playerName" id="player1Name">Giocatore 1</div>
+        <div class="playerStatus" id="player1Status">⏳ In attesa</div>
+        <button id="player1ReadyBtn" class="readyBtn">Pronto?</button>
+      </div>
+
+      <div class="playerBox" id="player2Box">
+        <div class="playerName" id="player2Name">Giocatore 2</div>
+        <div class="playerStatus" id="player2Status">⏳ In attesa</div>
+        <button id="player2ReadyBtn" class="readyBtn">Pronto?</button>
+      </div>
     </div>
+
+    <!-- Timer centrale -->
+    <div id="countdownTimer" style="display: none;">10</div>
+
     </div>
 
     </div>

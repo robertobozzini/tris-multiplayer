@@ -337,3 +337,30 @@ button:hover {
   font-weight: bold;
 }
 
+.readyBtn {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  background-color: #1e90ff;
+  color: white;
+  cursor: pointer;
+}
+
+.readyBtn:hover {
+  background-color: #0b6ecf;
+}
+
+.playerStatus {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+#countdownTimer {
+  margin-top: 2rem;
+  font-size: 2rem;
+  font-weight: bold;
+  color: red;
+  text-align: center;
+}
