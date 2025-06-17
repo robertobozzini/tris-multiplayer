@@ -20,17 +20,9 @@ function applyFilter() {
   });
 }
 
-function sendReady() {
-  if (isReady) return;
-  isReady = true;
-  console.log(JSON.stringify({
-    action: "ready",
-    player: sessionStorage.getItem("trisNickname")
-  }));
-  socket.send(JSON.stringify({
-    action: "ready",
-    player: sessionStorage.getItem("trisNickname")
-  }));
+function stopCountdown() {
+  clearInterval(countdownInterval);
+  document.getElementById("countdownTimer").style.display = "none";
 }
 
 function startCountdown() {
@@ -49,6 +41,30 @@ function startCountdown() {
       // Puoi qui attivare la funzione per mostrare il gioco
     }
   }, 1000);
+}
+
+function sendReady() {
+  isReady = !isReady;
+
+  socket.send(JSON.stringify({
+    action: "ready",
+    player: sessionStorage.getItem("trisNickname"),
+    isReady: isReady
+  }));
+
+  const statusId = myPlayerNumber === 1 ? "player1Status" : "player2Status";
+  const buttonId = myPlayerNumber === 1 ? "player1ReadyBtn" : "player2ReadyBtn";
+
+  document.getElementById(statusId).textContent = isReady ? "✅ Pronto" : "⏳ In attesa";
+  document.getElementById(buttonId).textContent = isReady ? "Annulla" : "Pronto?";
+
+  if (!isReady || !otherPlayerReady) {
+    stopCountdown();
+  }
+
+  if (isReady && otherPlayerReady) {
+    startCountdown();
+  }
 }
 
 // 2) Richiesta lista lobby (sempre, quando il WS è OPEN)
@@ -540,17 +556,24 @@ function handleSocketMessage(event) {
       document.getElementById("player2ReadyBtn").style.display = "inline-block";
     }
   }
-  else if (data.action === "ready") {
+  else if (data.result === "ready") {
     const nick = data.player;
+    const isPlayerReady = data.isReady; // usa il valore dal server
     const myNick = sessionStorage.getItem("trisNickname");
 
-    if (nick !== myNick) {
-      otherPlayerReady = true;
-      const statusId = myPlayerNumber === 1 ? "player2Status" : "player1Status";
-      document.getElementById(statusId).textContent = "✅ Pronto";
-    } else {
-      const statusId = myPlayerNumber === 1 ? "player1Status" : "player2Status";
-      document.getElementById(statusId).textContent = "✅ Pronto";
+    const isOther = nick !== myNick;
+    const statusId = (myPlayerNumber === 1)
+      ? (isOther ? "player2Status" : "player1Status")
+      : (isOther ? "player1Status" : "player2Status");
+
+    document.getElementById(statusId).textContent = isPlayerReady ? "✅ Pronto" : "⏳ In attesa";
+
+    if (isOther) {
+      otherPlayerReady = isPlayerReady;
+    }
+
+    if (!isReady || !otherPlayerReady) {
+      stopCountdown();
     }
 
     if (isReady && otherPlayerReady) {
