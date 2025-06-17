@@ -11,6 +11,8 @@ let otherPlayerReady = false;
 let myPlayerNumber = null; // 1 o 2
 let countdownInterval = null;
 let lobbyPageShown = false;
+let countdownStarted = false;
+
 
 
 let currentFilter = "";  // terrà traccia del testo da filtrare
@@ -22,10 +24,15 @@ function applyFilter() {
 
 function stopCountdown() {
   clearInterval(countdownInterval);
+  countdownStarted = false;
   document.getElementById("countdownTimer").style.display = "none";
 }
 
 function startCountdown() {
+  if (countdownStarted) return; // evita doppi countdown
+
+  countdownStarted = true;
+
   const timer = document.getElementById("countdownTimer");
   let count = 10;
   timer.textContent = count;
@@ -36,12 +43,14 @@ function startCountdown() {
     timer.textContent = count;
     if (count <= 0) {
       clearInterval(countdownInterval);
+      countdownStarted = false;
       timer.style.display = "none";
       console.log("▶ Inizio partita!");
-      // Puoi qui attivare la funzione per mostrare il gioco
+      // Avvia qui la partita
     }
   }, 1000);
 }
+
 
 function sendReady() {
   isReady = !isReady;
@@ -49,7 +58,8 @@ function sendReady() {
   socket.send(JSON.stringify({
     action: "ready",
     player: sessionStorage.getItem("trisNickname"),
-    isReady: isReady
+    isReady: isReady,
+    richiesta: false
   }));
 
   const statusId = myPlayerNumber === 1 ? "player1Status" : "player2Status";
@@ -498,7 +508,22 @@ function handleSocketMessage(event) {
 
   // Gestione joinlobby
   if (data.result === "joined") {
+    const myNickn = sessionStorage.getItem("trisNickname");
+    const p11 = data.player1;
+    const p21 = data.player2;
+    if ((myNickn === p11 && p21) || (myNickn === p21 && p11)) {
+      socket.send(JSON.stringify({
+        action: "ready",
+        player: myNickn,
+        richiesta: true
+      }));
+    }
     // il server conferma l’entrata
+    socket.send(JSON.stringify({
+    action: "ready",
+    player: sessionStorage.getItem("trisNickname"),
+    richiesta: true
+    }));
     document.getElementById("passwordModal").style.display = "none";
   
     showLobbyPageUnit();
@@ -519,6 +544,14 @@ function handleSocketMessage(event) {
 
 
     isReady = false;
+
+    socket.send(JSON.stringify({
+      action: "ready",
+      player: sessionStorage.getItem("trisNickname"),
+      isReady: false,
+      richiesta: false
+    }));
+
     otherPlayerReady = false;
 
     // Nascondi entrambi i pulsanti
@@ -558,7 +591,7 @@ function handleSocketMessage(event) {
   }
   else if (data.result === "ready") {
     const nick = data.player;
-    const isPlayerReady = data.isReady; // questo campo serve!
+    const isPlayerReady = data.isReady; 
     const myNick = sessionStorage.getItem("trisNickname");
 
     const isOther = nick !== myNick;
