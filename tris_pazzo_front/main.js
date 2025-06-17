@@ -10,24 +10,26 @@ let isReady = false;
 let otherPlayerReady = false;
 let myPlayerNumber = null; // 1 o 2
 let countdownInterval = null;
-
+let lobbyPageShown = false;
 
 
 let currentFilter = "";  // terrà traccia del testo da filtrare
 function applyFilter() {
   document.querySelectorAll("#lobbyList li").forEach(li => {
-    li.style.display = li.textContent.toLowerCase().includes(currentFilter)
-      ? ""
-      : "none";
+    li.style.display = li.textContent.toLowerCase().includes(currentFilter) ? "" : "none";
   });
 }
 
 function sendReady() {
   if (isReady) return;
   isReady = true;
+  console.log(JSON.stringify({
+    action: "ready",
+    player: sessionStorage.getItem("trisNickname")
+  }));
   socket.send(JSON.stringify({
     action: "ready",
-    player: getNickname()
+    player: sessionStorage.getItem("trisNickname")
   }));
 }
 
@@ -145,6 +147,7 @@ function updateLobbyList(lobbies) {
 // 4) Mostra/nascondi sezioni
 function showHomePage() {
   clearInterval(lobbyInterval);
+  lobbyPageShown = false;
   document.getElementById("homePage").style.display  = "block";
   document.getElementById("lobbyPage").style.display = "none";
   document.getElementById("gamePage").style.display  = "none";
@@ -152,6 +155,8 @@ function showHomePage() {
 }
 
 function showLobbyPage(nick) {
+  if (lobbyPageShown) return;
+  lobbyPageShown = true;
   document.getElementById("homePage").style.display  = "none";
   document.getElementById("lobbyPageUnit").style.display = "none";
   document.getElementById("lobbyPage").style.display = "block";
@@ -160,10 +165,12 @@ function showLobbyPage(nick) {
 
   // richiesta immediata + polling ogni 10s
   requestLobbies();
-  //lobbyInterval = setInterval(requestLobbies, 5000);
+  lobbyInterval = setInterval(requestLobbies, 1000);
 }
 
 function showLobbyPageUnit() {
+  clearInterval(lobbyInterval);
+  lobbyPageShown = false;
   document.getElementById("homePage").style.display = "none";
   document.getElementById("lobbyPage").style.display = "none";
   document.getElementById("gamePage").style.display = "none";
@@ -487,8 +494,9 @@ function handleSocketMessage(event) {
     const p1 = data.player1;
     const p2 = data.player2;
 
-    document.getElementById("player1Name").textContent = p1 || "In attesa...";
-    document.getElementById("player2Name").textContent = p2 || "In attesa...";
+    document.getElementById("player1Name").innerHTML = p1 ? `${p1} <span class="player-symbol-x">❌</span>` : "In attesa...";
+    document.getElementById("player2Name").innerHTML = p2 ? `${p2} <span class="player-symbol-o">⭕</span>` : "In attesa...";
+
 
     document.getElementById("player1Status").textContent = "⏳ In attesa";
     document.getElementById("player2Status").textContent = "⏳ In attesa";
@@ -510,23 +518,26 @@ function handleSocketMessage(event) {
       document.getElementById("player2ReadyBtn").style.display = "inline-block";
     }
   }
-  else if (data.action === "lobbyupdate") {
+  else if (data.result === "lobbyupdate") {
     const p1 = data.player1;
     const p2 = data.player2;
     const myNick = sessionStorage.getItem("trisNickname");
 
-    document.getElementById("player1Name").textContent = p1 || "In attesa...";
-    document.getElementById("player2Name").textContent = p2 || "In attesa...";
+    document.getElementById("player1Name").innerHTML = p1 ? `${p1} <span style="color: #0099ff;">❌</span>` : "In attesa...";
+    document.getElementById("player2Name").innerHTML = p2 ? `${p2} <span style="color: red;">⭕</span>` : "In attesa...";
 
-    // Se ora entrambi i giocatori sono presenti, valuta se aggiornare i pulsanti o lo stato
-    if (p1 && p2) {
-      if (myNick === p1) {
-        myPlayerNumber = 1;
-        document.getElementById("player1ReadyBtn").style.display = "inline-block";
-      } else if (myNick === p2) {
-        myPlayerNumber = 2;
-        document.getElementById("player2ReadyBtn").style.display = "inline-block";
-      }
+
+    // Nasconde entrambi i pulsanti
+    document.getElementById("player1ReadyBtn").style.display = "none";
+    document.getElementById("player2ReadyBtn").style.display = "none";
+
+    // Aggiorna myPlayerNumber e mostra il bottone corretto
+    if (myNick === p1) {
+      myPlayerNumber = 1;
+      document.getElementById("player1ReadyBtn").style.display = "inline-block";
+    } else if (myNick === p2) {
+      myPlayerNumber = 2;
+      document.getElementById("player2ReadyBtn").style.display = "inline-block";
     }
   }
   else if (data.action === "ready") {
@@ -575,3 +586,19 @@ function handleSocketMessage(event) {
   }
 }
 
+let pingIntervalActive = false;
+
+async function startWebSocketPing(socket) {
+  if (pingIntervalActive) return; // avoid duplicates
+  pingIntervalActive = true;
+
+  while (pingIntervalActive) {
+    await new Promise(resolve => setTimeout(resolve, 60000)); // 1 minute
+    if (socket.readyState === WebSocket.OPEN) {
+      console.log("Sending ping to WebSocket...");
+      socket.send("ping");
+    } else {
+      console.warn("WebSocket not open. Ping skipped.");
+    }
+  }
+}

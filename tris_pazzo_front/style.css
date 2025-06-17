@@ -364,3 +364,24 @@ button:hover {
   color: red;
   text-align: center;
 }
+
+
+
+.player-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.player-slot span {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Simboli */
+.player-symbol-x {
+  color: #007bff; /* azzurro */
+}
+.player-symbol-o {
+  color: #e63946; /* rosso */
+}
