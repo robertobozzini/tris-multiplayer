@@ -604,6 +604,8 @@ function handleSocketMessage(event) {
 
     if (isReady && otherPlayerReady) {
       startCountdown();
+    }else {
+      stopCountdown();  
     }
   }
   else if (data.result==="Lobby name already taken") {
