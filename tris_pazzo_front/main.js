@@ -583,7 +583,7 @@ function handleSocketMessage(event) {
       document.getElementById("player2ReadyBtn").style.display = "inline-block";
     }
   }
-  else if (data.action === "ready") {
+  else if (data.result === "ready") {
     const nick = data.player;
     const myNick = sessionStorage.getItem("trisNickname");
     const isPlayerReady = data.isReady ?? true; // fallback per compatibilità
