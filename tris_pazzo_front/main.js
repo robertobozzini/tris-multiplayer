@@ -12,6 +12,11 @@ let myPlayerNumber = null; // 1 o 2
 let countdownInterval = null;
 let lobbyPageShown = false;
 let countdownStarted = false;
+let currentPlayer1 = null;
+let currentPlayer2 = null;
+let currentTurn = 1; // 1 = player1, 2 = player2
+let boardState = Array(9).fill(null); // "X", "O" o null
+
 
 
 
@@ -21,6 +26,39 @@ function applyFilter() {
     li.style.display = li.textContent.toLowerCase().includes(currentFilter) ? "" : "none";
   });
 }
+
+function handleCellClick(index, cell) {
+  const nick = sessionStorage.getItem("trisNickname");
+
+  if (!nick || boardState[index] !== null) return;
+
+  const myTurn = (myPlayerNumber === currentTurn);
+  if (!myTurn) return;
+
+  socket.send(JSON.stringify({
+    action: "game",
+    move: index,
+    lobby_name: sessionStorage.getItem("currentLobby"),
+  }));
+}
+
+
+function setupGameBoard() {
+  const board = document.getElementById("gameBoard");
+  board.innerHTML = ""; 
+  boardState = Array(9).fill(null);
+  for (let i = 0; i < 9; i++) {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.dataset.index = i;
+
+    cell.addEventListener("click", () => handleCellClick(i, cell));
+    board.appendChild(cell);
+  }
+  
+
+}
+
 
 function stopCountdown() {
   clearInterval(countdownInterval);
@@ -34,7 +72,7 @@ function startCountdown() {
   countdownStarted = true;
 
   const timer = document.getElementById("countdownTimer");
-  let count = 10;
+  let count = 5;
   timer.textContent = count;
   timer.style.display = "block";
 
@@ -46,7 +84,19 @@ function startCountdown() {
       countdownStarted = false;
       timer.style.display = "none";
       console.log("▶ Inizio partita!");
-      // Avvia qui la partita
+      document.getElementById("homePage").style.display = "none";
+      document.getElementById("lobbyPage").style.display = "none";
+      document.getElementById("lobbyPageUnit").style.display = "none";
+
+      // Mostra la pagina di gioco
+      document.getElementById("gamePage").style.display = "block";
+      document.getElementById("passwordModal").style.display = "none";
+      
+      document.getElementById("gamePlayer1Name").textContent = currentPlayer1 || "Player 1";
+      document.getElementById("gamePlayer2Name").textContent = currentPlayer2 || "Player 2";
+
+      setupGameBoard();
+
     }
   }, 1000);
 }
@@ -62,20 +112,19 @@ function sendReady() {
     richiesta: false
   }));
 
+  const btnId = myPlayerNumber === 1 ? "player1ReadyBtn" : "player2ReadyBtn";
   const statusId = myPlayerNumber === 1 ? "player1Status" : "player2Status";
-  const buttonId = myPlayerNumber === 1 ? "player1ReadyBtn" : "player2ReadyBtn";
 
+  document.getElementById(btnId).textContent = isReady ? "Annulla" : "Pronto?";
   document.getElementById(statusId).textContent = isReady ? "✅ Pronto" : "⏳ In attesa";
-  document.getElementById(buttonId).textContent = isReady ? "Annulla" : "Pronto?";
-
-  if (!isReady || !otherPlayerReady) {
-    stopCountdown();
-  }
 
   if (isReady && otherPlayerReady) {
     startCountdown();
+  } else {
+    stopCountdown();
   }
 }
+
 
 // 2) Richiesta lista lobby (sempre, quando il WS è OPEN)
 function requestLobbies() {
@@ -414,6 +463,39 @@ window.addEventListener("DOMContentLoaded", () => {
     console.log("🔌 WebSocket chiusa")
   );
 
+
+  
+  // Mostra nickname anche nella schermata di gioco
+  document.getElementById("nicknameDisplayGame").textContent = sessionStorage.getItem("trisNickname") || "";
+
+  // Bottone Logout (uscita completa dal gioco)
+  document.getElementById("logoutBtnGame").addEventListener("click", () => {
+    const nick = sessionStorage.getItem("trisNickname");
+    if (nick) {
+      socket.send(JSON.stringify({
+        action: "logout",
+        player: nick
+      }));
+    }
+    sessionStorage.clear(); // svuota tutto (nickname e lobby)
+    showHomePage();         // torna alla schermata iniziale
+  });
+
+  // Bottone Leave (lascia solo la lobby, torna alla lobby list)
+  document.getElementById("exitGameBtn").addEventListener("click", () => {
+    const nick = sessionStorage.getItem("trisNickname");
+    if (nick) {
+      socket.send(JSON.stringify({
+        action: "leavelobby",
+        player: nick
+      }));
+      sessionStorage.removeItem("currentLobby"); // mantieni il nickname, rimuovi solo la lobby
+      showLobbyPage(nick); // torna alla pagina con la lista delle lobby
+    }
+  });
+
+
+
   // ————— 5) BOOTSTRAP INIZIALE —————
 const savedNick = sessionStorage.getItem("trisNickname");
 const currentLobby = sessionStorage.getItem("currentLobby");
@@ -509,14 +591,16 @@ function handleSocketMessage(event) {
   // Gestione joinlobby
   if (data.result === "joined") {
     const myNickn = sessionStorage.getItem("trisNickname");
-    const p11 = data.player1;
-    const p21 = data.player2;
-    if ((myNickn === p11 && p21) || (myNickn === p21 && p11)) {
-      socket.send(JSON.stringify({
-        action: "ready",
-        player: myNickn,
-        richiesta: true
-      }));
+    currentPlayer1=data.player1;
+    currentPlayer2=data.player2;
+  
+    if ((myNickn === currentPlayer1 && currentPlayer2) || (myNickn === currentPlayer2 && currentPlayer1)) {
+      
+      socket.send(JSON.stringify({ action:"ready", player:myNickn, isReady:false, richiesta:false }));
+      // aspetta 50 ms, poi chiedi lo stato
+      setTimeout(() => {
+        socket.send(JSON.stringify({ action:"ready", player:myNickn, richiesta:true }));
+      }, 50);
     }
     document.getElementById("passwordModal").style.display = "none";
   
@@ -535,7 +619,8 @@ function handleSocketMessage(event) {
 
     document.getElementById("player1Status").textContent = "⏳ In attesa";
     document.getElementById("player2Status").textContent = "⏳ In attesa";
-
+    document.getElementById("player1ReadyBtn").textContent = "Pronto?";
+    document.getElementById("player2ReadyBtn").textContent = "Pronto?";
 
     isReady = false;
 
@@ -556,14 +641,38 @@ function handleSocketMessage(event) {
     if (myNick === p1) {
       myPlayerNumber = 1;
       document.getElementById("player1ReadyBtn").style.display = "inline-block";
+      document.getElementById("player1ReadyBtn").textContent = "Pronto?";
     } else if (myNick === p2) {
       myPlayerNumber = 2;
       document.getElementById("player2ReadyBtn").style.display = "inline-block";
+      document.getElementById("player2ReadyBtn").textContent = "Pronto?";
     }
   }
+  else if (data.result === "feedback") {
+    if (!Array.isArray(data.board)) return;
+
+    boardState = data.board;
+    const cells = document.querySelectorAll("#gameBoard .cell");
+
+    boardState.forEach((val, i) => {
+      cells[i].textContent = val || "";
+    });
+
+    currentTurn = data.turn+1; // es. 1 o 2
+  }
   else if (data.result === "lobbyupdate") {
+
+    document.getElementById("player1Status").textContent = "⏳ In attesa";
+    document.getElementById("player2Status").textContent = "⏳ In attesa";
+    document.getElementById("player1ReadyBtn").textContent = "Pronto?";
+    document.getElementById("player2ReadyBtn").textContent = "Pronto?";
+    isReady = false;
+    otherPlayerReady = false;
+
     const p1 = data.player1;
     const p2 = data.player2;
+    currentPlayer1 = data.player1;
+    currentPlayer2 = data.player2;
     const myNick = sessionStorage.getItem("trisNickname");
 
     document.getElementById("player1Name").innerHTML = p1 ? `${p1} <span style="color: #0099ff;">❌</span>` : "In attesa...";
@@ -578,23 +687,35 @@ function handleSocketMessage(event) {
     if (myNick === p1) {
       myPlayerNumber = 1;
       document.getElementById("player1ReadyBtn").style.display = "inline-block";
+      document.getElementById("player1ReadyBtn").textContent = "Pronto?";
     } else if (myNick === p2) {
       myPlayerNumber = 2;
       document.getElementById("player2ReadyBtn").style.display = "inline-block";
+      document.getElementById("player2ReadyBtn").textContent = "Pronto?";
     }
   }
   else if (data.result === "ready") {
     const nick = data.player;
     const myNick = sessionStorage.getItem("trisNickname");
-    const isPlayerReady = data.isReady ?? true; // fallback per compatibilità
+    const isPlayerReady = (data.isReady === true); // undefined → false
 
     const isOther = nick !== myNick;
 
-    const statusId = myPlayerNumber === 1
-      ? (isOther ? "player2Status" : "player1Status")
-      : (isOther ? "player1Status" : "player2Status");
+    let statusId = "";
+    if (nick === currentPlayer1) {
+      statusId = "player1Status";
+    } else if (nick === currentPlayer2) {
+      statusId = "player2Status";
+    }
 
-    document.getElementById(statusId).textContent = isPlayerReady ? "✅ Pronto" : "⏳ In attesa";
+
+    if (statusId) {
+      document.getElementById(statusId).textContent = isPlayerReady ? "✅ Pronto" : "⏳ In attesa";
+    }
+    if (!isOther) {
+      const btnId = myPlayerNumber === 1 ? "player1ReadyBtn" : "player2ReadyBtn";
+      document.getElementById(btnId).textContent = isPlayerReady ? "Annulla" : "Pronto?";
+    }
 
     if (isOther) {
       otherPlayerReady = isPlayerReady;
@@ -604,8 +725,8 @@ function handleSocketMessage(event) {
 
     if (isReady && otherPlayerReady) {
       startCountdown();
-    }else {
-      stopCountdown();  
+    } else {
+      stopCountdown();
     }
   }
   else if (data.result==="Lobby name already taken") {

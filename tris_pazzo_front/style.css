@@ -385,3 +385,96 @@ button:hover {
 .player-symbol-o {
   color: #e63946; /* rosso */
 }
+
+.game-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  z-index: 3;
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.game-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.player-name {
+  flex: 1;
+  text-align: center;
+}
+
+.vs-separator {
+  margin: 0 12px;
+  color: #666;
+}
+
+.game-board {
+  width: 100%;
+  /* imposta qui le dimensioni del tuo campo */
+  height: 400px;
+  background: #f9f9f9;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+}
+
+#gamePage {
+  position: relative; /* o absolute/fixed se già usato */
+  z-index: 9999;      /* più alto di qualsiasi overlay */
+}
+
+#gameBoard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 10px;
+  width: 300px;       /* oppure usa % per responsive */
+  height: 300px;
+  margin: 0 auto;
+  background-color: #eee;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.cell {
+  background-color: white;
+  border: 2px solid #333;
+  font-size: 48px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;  /* facoltativo se usi grid */
+  height: 100%;
+}
+
+#logoutBtnGame, #exitGameBtn {
+  position: absolute;
+  left: 10px;
+  font-weight: bold;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  border: 1px solid white;
+  border-radius: 8px;
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  z-index: 2;
+}
+
+#logoutBtnGame { top: 50px; }
+#exitGameBtn { top: 83px; }
+
+#logoutBtnGame:hover, #exitGameBtn:hover {
+  background-color: #f0f0f0;
+}
