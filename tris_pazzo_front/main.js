@@ -489,7 +489,15 @@ window.addEventListener("DOMContentLoaded", () => {
       }));
     }
     sessionStorage.clear(); // svuota tutto (nickname e lobby)
-    showHomePage();         // torna alla schermata iniziale
+
+    const nicknameInput = document.getElementById("nickname");
+    nicknameInput.value = "";
+    nicknameInput.style.borderColor = "";
+
+    document.getElementById("newLobbyName").value = "";
+    document.getElementById("newLobbyPassword").value = "";
+
+    showHomePage();         
   });
 
 
@@ -762,7 +770,7 @@ function handleSocketMessage(event) {
         }, 3000 + delayPlayer); // Player 1: 3s — Player 2: 4s
 
       }, 5000); // aspetta 5 secondi dopo la fine partita
-      
+
       return; // esci dal blocco feedback
     }
 
