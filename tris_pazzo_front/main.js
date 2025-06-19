@@ -105,7 +105,8 @@ function startCountdown() {
       
       document.getElementById("gamePlayer1Name").textContent = currentPlayer1 || "Player 1";
       document.getElementById("gamePlayer2Name").textContent = currentPlayer2 || "Player 2";
-
+      document.getElementById("gamePlayer1Name").style.textDecoration="Underline";
+      document.getElementById("gamePlayer2Name").style.textDecoration="none";
       setupGameBoard();
 
     }
@@ -691,10 +692,18 @@ function handleSocketMessage(event) {
     boardState = data.board;
     currentTurn = data.turn;
     console.log(boardState)
-    // Rigenera le celle e i listener da zero
-    
+      
+    const player1Name = document.getElementById("gamePlayer1Name");
+    const player2Name = document.getElementById("gamePlayer2Name");
 
-    // Poi aggiorna i contenuti con i simboli X/O
+    if (currentTurn === 1) {
+      player1Name.style.textDecoration = "underline";
+      player2Name.style.textDecoration = "none";
+    } else if (currentTurn === 2) {
+      player1Name.style.textDecoration = "none";
+      player2Name.style.textDecoration = "underline";
+    }
+
     const cells = document.querySelectorAll("#gameBoard .cell");
     cells.forEach((cell, i) => {
       const val = boardState[i];
@@ -719,10 +728,10 @@ function handleSocketMessage(event) {
         messageDiv.style.color = "orange";        
       }
       else if (winnerSymbol === mySymbol) {
-        messageDiv.textContent = "Hai vinto!";
+        messageDiv.textContent = data.resigned===1 ? "Hai vinto per abbandono!" : "Hai vinto!";
         messageDiv.style.color = "green";
       } else {
-        messageDiv.textContent = "Hai perso!";
+        messageDiv.textContent = data.resigned===1 ? "Hai perso per abbandono!" : "Hai perso!";
         messageDiv.style.color = "red";
       }
 
