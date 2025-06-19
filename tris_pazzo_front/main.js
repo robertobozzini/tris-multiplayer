@@ -725,38 +725,44 @@ function handleSocketMessage(event) {
         cell.style.pointerEvents = "none";
       });
 
-      // Dopo 5 secondi, torna alla lobby
+      const nick = sessionStorage.getItem("trisNickname");
+      const lobby = sessionStorage.getItem("currentLobby");
+      const password = sessionStorage.getItem("currentLobbyPass") || "";
+      const delayPlayer = myPlayerNumber === 1 ? 0 : 1000; // Player 2 aspetta 1s in più
+
+      // Mostra messaggio per 5 secondi, poi inizia sequenza
       setTimeout(() => {
-        const nick = sessionStorage.getItem("trisNickname");
+        // 1. LEAVE
+        setTimeout(() => {
+          if (nick) {
+            socket.send(JSON.stringify({
+              action: "leavelobby",
+              player: nick
+            }));
+            console.log(`[LEAVE] Inviato da ${nick}`);
+          }
+        }, 1000 + delayPlayer); // Player 1: 1s — Player 2: 2s
 
-        if (nick) {
-          socket.send(JSON.stringify({
-            action: "leavelobby",
-            player: nick
-          }));
-        }
-
-        const extraDelay = (myPlayerNumber === 2) ? 2000 : 0;
-
+        // 2. JOIN
         setTimeout(() => {
           if (nick) {
             socket.send(JSON.stringify({
               action: "joinlobby",
               player: nick,
-              lobby_name: sessionStorage.getItem("currentLobby"),
-              password: sessionStorage.getItem("currentLobbyPass")
+              lobby_name: lobby,
+              password: password
             }));
+            console.log(`[JOIN] Inviato da ${nick}`);
           }
 
+          // Nasconde il messaggio finale e mostra la lobby
           document.getElementById("gameResultMessage").style.display = "none";
-
           if (nick) showLobbyPageUnit(nick);
 
-        }, 200+extraDelay); // delay di 200ms tra leave e join
+        }, 3000 + delayPlayer); // Player 1: 3s — Player 2: 4s
 
-      }, 5000); // attesa iniziale di 5s dopo la vittoria/sconfitta
-
-
+      }, 5000); // aspetta 5 secondi dopo la fine partita
+      
       return; // esci dal blocco feedback
     }
 
