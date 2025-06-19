@@ -28,13 +28,18 @@ function applyFilter() {
 }
 
 function handleCellClick(index, cell) {
+  
   const nick = sessionStorage.getItem("trisNickname");
-
-  if (!nick || boardState[index] !== null) return;
-
+  if (!nick || boardState[index]) return;
   const myTurn = (myPlayerNumber === currentTurn);
   if (!myTurn) return;
 
+  console.log(JSON.stringify({
+    action: "game",
+    move: index,
+    lobby_name: sessionStorage.getItem("currentLobby"),
+  })
+  )
   socket.send(JSON.stringify({
     action: "game",
     move: index,
@@ -47,17 +52,22 @@ function setupGameBoard() {
   const board = document.getElementById("gameBoard");
   board.innerHTML = ""; 
   boardState = Array(9).fill(null);
+  currentTurn = 1;
+
   for (let i = 0; i < 9; i++) {
     const cell = document.createElement("div");
     cell.className = "cell";
     cell.dataset.index = i;
 
-    cell.addEventListener("click", () => handleCellClick(i, cell));
+    cell.addEventListener("click", (e) => {
+      const index = parseInt(cell.dataset.index);
+      handleCellClick(index, cell);
+    });
+
     board.appendChild(cell);
   }
-  
-
 }
+
 
 
 function stopCountdown() {
@@ -68,6 +78,7 @@ function stopCountdown() {
 
 function startCountdown() {
   if (countdownStarted) return; // evita doppi countdown
+  document.getElementById("nicknameDisplayGame").textContent = sessionStorage.getItem("trisNickname") || "";
 
   countdownStarted = true;
 
@@ -183,7 +194,7 @@ function updateLobbyList(lobbies) {
             password: pwd
           }));
           
-          sessionStorage.setItem("trisLobby", lobby.lobby_name);
+          sessionStorage.setItem("currentLobby", lobby.lobby_name);
 
         };
 
@@ -464,7 +475,7 @@ window.addEventListener("DOMContentLoaded", () => {
   );
 
 
-  
+
   // Mostra nickname anche nella schermata di gioco
   document.getElementById("nicknameDisplayGame").textContent = sessionStorage.getItem("trisNickname") || "";
 
@@ -480,6 +491,22 @@ window.addEventListener("DOMContentLoaded", () => {
     sessionStorage.clear(); // svuota tutto (nickname e lobby)
     showHomePage();         // torna alla schermata iniziale
   });
+
+
+  document.getElementById("resignBtnGame").addEventListener("click", () => {
+    const nick = sessionStorage.getItem("trisNickname");
+    const lobby = sessionStorage.getItem("currentLobby");
+
+    if (nick && lobby) {
+      socket.send(JSON.stringify({
+        action: "game",
+        feedback: "resign",
+        move: "nulla",
+        lobby_name: sessionStorage.getItem("currentLobby")
+      }));
+    }
+  });
+
 
   // Bottone Leave (lascia solo la lobby, torna alla lobby list)
   document.getElementById("exitGameBtn").addEventListener("click", () => {
@@ -640,25 +667,99 @@ function handleSocketMessage(event) {
 
     if (myNick === p1) {
       myPlayerNumber = 1;
+      sessionStorage.setItem("symbol", "X");
       document.getElementById("player1ReadyBtn").style.display = "inline-block";
       document.getElementById("player1ReadyBtn").textContent = "Pronto?";
     } else if (myNick === p2) {
       myPlayerNumber = 2;
+      sessionStorage.setItem("symbol", "O");
       document.getElementById("player2ReadyBtn").style.display = "inline-block";
       document.getElementById("player2ReadyBtn").textContent = "Pronto?";
     }
   }
   else if (data.result === "feedback") {
     if (!Array.isArray(data.board)) return;
-
+    setupGameBoard();
     boardState = data.board;
+    currentTurn = data.turn;
+    console.log(boardState)
+    // Rigenera le celle e i listener da zero
+    
+
+    // Poi aggiorna i contenuti con i simboli X/O
     const cells = document.querySelectorAll("#gameBoard .cell");
-
-    boardState.forEach((val, i) => {
-      cells[i].textContent = val || "";
+    cells.forEach((cell, i) => {
+      const val = boardState[i];
+      console.log(i);
+      console.log(boardState);
+      console.log(boardState[i]);
+      console.log(val === 'X' || val === 'O')
+      cell.textContent = (val === 'X' || val === 'O') ? val : '';
+      
     });
+    if (data.risultato === "win" || data.risultato==="draw") {
+      const winnerSymbol = data.winner;
+      const mySymbol = sessionStorage.getItem("symbol");
 
-    currentTurn = data.turn+1; // es. 1 o 2
+      console.log(data.symbol, winnerSymbol);
+      console.log(mySymbol, sessionStorage.getItem("symbol"));
+      console.log(winnerSymbol === mySymbol);
+      const messageDiv = document.getElementById("gameResultMessage");
+      if(data.risultato==="draw")
+      {
+        messageDiv.textContent = "Pareggio!";
+        messageDiv.style.color = "orange";        
+      }
+      else if (winnerSymbol === mySymbol) {
+        messageDiv.textContent = "Hai vinto!";
+        messageDiv.style.color = "green";
+      } else {
+        messageDiv.textContent = "Hai perso!";
+        messageDiv.style.color = "red";
+      }
+
+      messageDiv.style.display = "block";
+
+      // Disattiva la board
+      document.querySelectorAll(".cell").forEach(cell => {
+        cell.style.pointerEvents = "none";
+      });
+
+      // Dopo 5 secondi, torna alla lobby
+      setTimeout(() => {
+        const nick = sessionStorage.getItem("trisNickname");
+
+        if (nick) {
+          socket.send(JSON.stringify({
+            action: "leavelobby",
+            player: nick
+          }));
+        }
+
+        const extraDelay = (myPlayerNumber === 2) ? 2000 : 0;
+
+        setTimeout(() => {
+          if (nick) {
+            socket.send(JSON.stringify({
+              action: "joinlobby",
+              player: nick,
+              lobby_name: sessionStorage.getItem("currentLobby"),
+              password: sessionStorage.getItem("currentLobbyPass")
+            }));
+          }
+
+          document.getElementById("gameResultMessage").style.display = "none";
+
+          if (nick) showLobbyPageUnit(nick);
+
+        }, 200+extraDelay); // delay di 200ms tra leave e join
+
+      }, 5000); // attesa iniziale di 5s dopo la vittoria/sconfitta
+
+
+      return; // esci dal blocco feedback
+    }
+
   }
   else if (data.result === "lobbyupdate") {
 
@@ -686,13 +787,17 @@ function handleSocketMessage(event) {
     // Aggiorna myPlayerNumber e mostra il bottone corretto
     if (myNick === p1) {
       myPlayerNumber = 1;
+      sessionStorage.setItem("symbol", "X");
       document.getElementById("player1ReadyBtn").style.display = "inline-block";
       document.getElementById("player1ReadyBtn").textContent = "Pronto?";
     } else if (myNick === p2) {
       myPlayerNumber = 2;
+      sessionStorage.setItem("symbol", "O");
       document.getElementById("player2ReadyBtn").style.display = "inline-block";
       document.getElementById("player2ReadyBtn").textContent = "Pronto?";
     }
+
+    showLobbyPageUnit();
   }
   else if (data.result === "ready") {
     const nick = data.player;
