@@ -745,11 +745,10 @@ function handleSocketMessage(event) {
       const nick = sessionStorage.getItem("trisNickname");
       const lobby = sessionStorage.getItem("currentLobby");
       const password = sessionStorage.getItem("currentLobbyPass") || "";
-      const delayPlayer = myPlayerNumber === 1 ? 0 : 1000; // Player 2 aspetta 1s in più
-
-      // Mostra messaggio per 5 secondi, poi inizia sequenza
+      const delayPlayer = myPlayerNumber === 1 ? 0 : 500; // Player 2 aspetta 1s in più
+      const baseDelay = 2500;
+      
       setTimeout(() => {
-        // 1. LEAVE
         setTimeout(() => {
           if (nick) {
             socket.send(JSON.stringify({
@@ -758,9 +757,8 @@ function handleSocketMessage(event) {
             }));
             console.log(`[LEAVE] Inviato da ${nick}`);
           }
-        }, 1000 + delayPlayer); // Player 1: 1s — Player 2: 2s
-
-        // 2. JOIN
+        }, 500 + delayPlayer); 
+        
         setTimeout(() => {
           if (nick) {
             socket.send(JSON.stringify({
@@ -776,9 +774,9 @@ function handleSocketMessage(event) {
           document.getElementById("gameResultMessage").style.display = "none";
           if (nick) showLobbyPageUnit(nick);
 
-        }, 3000 + delayPlayer); // Player 1: 3s — Player 2: 4s
+        }, 1000 + delayPlayer); // Player 1: 3s — Player 2: 4s
 
-      }, 5000); // aspetta 5 secondi dopo la fine partita
+      }, baseDelay); // aspetta 5 secondi dopo la fine partita
 
       return; // esci dal blocco feedback
     }
