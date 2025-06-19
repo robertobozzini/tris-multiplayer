@@ -27,6 +27,38 @@ function applyFilter() {
   });
 }
 
+function resetGameState() {
+  // Reset stato logico
+  boardState = Array(9).fill(null);
+  currentTurn = 1;
+  countdownStarted = false;
+  isReady = false;
+  otherPlayerReady = false;
+
+  // Reset messaggio finale
+  const messageDiv = document.getElementById("gameResultMessage");
+  messageDiv.textContent = "";
+  messageDiv.style.display = "none";
+
+  // Reset board visiva
+  const cells = document.querySelectorAll("#gameBoard .cell");
+  cells.forEach(cell => {
+    cell.textContent = "";
+    cell.style.pointerEvents = "auto";
+  });
+
+  // Reset sottolineature nomi
+  document.getElementById("gamePlayer1Name").style.textDecoration = "none";
+  document.getElementById("gamePlayer2Name").style.textDecoration = "none";
+
+  // Reset pulsanti e stati
+  document.getElementById("player1Status").textContent = "⏳ In attesa";
+  document.getElementById("player2Status").textContent = "⏳ In attesa";
+  document.getElementById("player1ReadyBtn").textContent = "Pronto?";
+  document.getElementById("player2ReadyBtn").textContent = "Pronto?";
+}
+
+
 function handleCellClick(index, cell) {
   
   const nick = sessionStorage.getItem("trisNickname");
@@ -743,42 +775,50 @@ function handleSocketMessage(event) {
       });
 
       const nick = sessionStorage.getItem("trisNickname");
-      const lobby = sessionStorage.getItem("currentLobby");
-      const password = sessionStorage.getItem("currentLobbyPass") || "";
-      const delayPlayer = myPlayerNumber === 1 ? 0 : 1000; // Player 2 aspetta 1s in più
 
-      // Mostra messaggio per 5 secondi, poi inizia sequenza
       setTimeout(() => {
-        // 1. LEAVE
-        setTimeout(() => {
-          if (nick) {
-            socket.send(JSON.stringify({
-              action: "leavelobby",
-              player: nick
-            }));
-            console.log(`[LEAVE] Inviato da ${nick}`);
-          }
-        }, 1000 + delayPlayer); // Player 1: 1s — Player 2: 2s
+        resetGameState(); 
+        showLobbyPageUnit(nick);
+      }, 1500);
+            
 
-        // 2. JOIN
-        setTimeout(() => {
-          if (nick) {
-            socket.send(JSON.stringify({
-              action: "joinlobby",
-              player: nick,
-              lobby_name: lobby,
-              password: password
-            }));
-            console.log(`[JOIN] Inviato da ${nick}`);
-          }
+      
+      // const lobby = sessionStorage.getItem("currentLobby");
+      // const password = sessionStorage.getItem("currentLobbyPass") || "";
+      
+      // const delayPlayer = myPlayerNumber === 1 ? 0 : 500; // Player 2 aspetta 0.5s in più
+      // const baseDelay = 2500; // mostra messaggio per 2.5s
 
-          // Nasconde il messaggio finale e mostra la lobby
-          document.getElementById("gameResultMessage").style.display = "none";
-          if (nick) showLobbyPageUnit(nick);
+      // setTimeout(() => {
+      //   // 1. LEAVE
+      //   setTimeout(() => {
+      //     if (nick) {
+      //       socket.send(JSON.stringify({
+      //         action: "leavelobby",
+      //         player: nick
+      //       }));
+      //       console.log(`[LEAVE] Inviato da ${nick}`);
+      //     }
+      //   }, 500 + delayPlayer); // P1: 0.5s — P2: 1.0s
+      //   setTimeout(() => {
+      //     if (nick) {
+      //       socket.send(JSON.stringify({
+      //         action: "joinlobby",
+      //         player: nick,
+      //         lobby_name: lobby,
+      //         password: password
+      //       }));
+      //       console.log(`[JOIN] Inviato da ${nick}`);
+      //     }
 
-        }, 3000 + delayPlayer); // Player 1: 3s — Player 2: 4s
+      //     document.getElementById("gameResultMessage").style.display = "none";
+      //     if (nick) showLobbyPageUnit(nick);
 
-      }, 5000); // aspetta 5 secondi dopo la fine partita
+      //   }, 1000 + delayPlayer); // P1: 1.0s — P2: 1.5s
+
+      // }, baseDelay); // attesa iniziale di 2.5s
+
+
 
       return; // esci dal blocco feedback
     }
