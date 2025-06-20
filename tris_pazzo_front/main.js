@@ -223,7 +223,7 @@ function updateLobbyList(lobbies) {
           passwordInput.style.borderColor = "#ccc"; // reset
 
           sessionStorage.setItem("currentLobbyPass", pwd);
-
+          console.log("ws");
           socket.send(JSON.stringify({
             action: "joinlobby",
             player: sessionStorage.getItem("trisNickname"),
@@ -613,7 +613,7 @@ if (savedNick) {
           }));
         }, 300);
       } else {
-        
+        console.log("wsss");
         const currentLobbyPass = sessionStorage.getItem("currentLobbyPass");
         socket.send(JSON.stringify({
           action: "joinlobby",
@@ -637,6 +637,10 @@ if (savedNick) {
         nickname: savedNick,
         oldId: sessionStorage.getItem("connectionID") || ""
       }));
+      setTimeout(() => {
+          // codice da eseguire dopo 500ms (0.5 secondi)
+        console.log("Eseguito dopo mezzo secondo");
+      }, 500);
 
       if(currentLobby){
         if(wasInGame)
@@ -726,7 +730,10 @@ function handleSocketMessage(event) {
     }
     document.getElementById("passwordModal").style.display = "none";
   
-    showLobbyPageUnit();
+    if (sessionStorage.getItem("inGame") !== "true") {
+      showLobbyPageUnit();
+    }
+
     // Aggiorna il nome della lobby
     document.getElementById("lobbyNameDisplay").textContent = `Lobby: ${data.lobby}`;
     sessionStorage.setItem("currentLobby", data.lobby);
@@ -773,6 +780,7 @@ function handleSocketMessage(event) {
     }
   }
   else if (data.result === "feedback") {
+    sessionStorage.setItem("inGame", "true");
     if (!Array.isArray(data.board)) return;
     setupGameBoard();
     boardState = data.board;
