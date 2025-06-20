@@ -660,13 +660,15 @@ if (savedNick) {
               move: "cds", 
               lobby_name: currentLobby
             }));
-
-            socket.send(JSON.stringify({
-              action: "game",
-              feedback: "resend",
-              move: "cds", 
-              lobby_name: currentLobby
-            }));
+            
+            setTimeout(() => {
+              socket.send(JSON.stringify({
+                action: "game",
+                feedback: "resend",
+                move: "cds", 
+                lobby_name: currentLobby
+              }));
+            }, 3000);
         }
         // const currentLobbyPass = sessionStorage.getItem("currentLobbyPass");
 
