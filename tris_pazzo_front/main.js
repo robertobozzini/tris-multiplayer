@@ -175,6 +175,7 @@ function sendReady() {
 
 // 2) Richiesta lista lobby (sempre, quando il WS è OPEN)
 function requestLobbies() {
+  if(sessionStorage.getItem("inGame")==="true") return
   if (socket.readyState === WebSocket.OPEN) {
     console.log("⟳ [requestLobbies] Invio { action: 'lobbylist' }");
     socket.send(JSON.stringify({ action: "lobbylist" }));
@@ -905,6 +906,8 @@ function handleSocketMessage(event) {
     const p2 = data.player2;
     currentPlayer1 = data.player1;
     currentPlayer2 = data.player2;
+    sessionStorage.setItem("player1", data.player1 || "");
+    sessionStorage.setItem("player2", data.player2 || "");
     const myNick = sessionStorage.getItem("trisNickname");
 
     document.getElementById("player1Name").innerHTML = p1 ? `${p1} <span style="color: #0099ff;">❌</span>` : "In attesa...";
