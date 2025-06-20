@@ -635,7 +635,7 @@ if (savedNick) {
     }
 
   } else {
-    console.log("dio");
+    console.log("1");
     // Se il socket non è ancora aperto, aspetta e poi esegui entrambi
     socket.addEventListener("open", () => {
       
@@ -648,7 +648,7 @@ if (savedNick) {
       if(currentLobby){
         if(wasInGame)
         {
-          console.log("cane");
+          console.log("2");
           document.getElementById("homePage").style.display = "none";
           document.getElementById("lobbyPage").style.display = "none";
           document.getElementById("lobbyPageUnit").style.display = "none";
