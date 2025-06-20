@@ -330,7 +330,7 @@ function Send() {
   const nick = getNickname();
   if (!nick) return;
   if (socket.readyState === WebSocket.OPEN) {
-    console.log("⟳ [Send] Invio { action: 'sendnickname', nickname:", nick, "}");
+    console.log("⟳ [Send] Invio { action: 'sendnickname', nickname:", nick, " oldId: ", sessionStorage.getItem("connectionID") || "", "}");
     console.log(JSON.stringify({
       action: "sendnickname",
       nickname: nick,
