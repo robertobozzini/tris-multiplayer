@@ -125,6 +125,7 @@ function startCountdown() {
     if (count <= 0) {
       clearInterval(countdownInterval);
       countdownStarted = false;
+      sessionStorage.setItem("inGame", true);
       timer.style.display = "none";
       console.log("▶ Inizio partita!");
       document.getElementById("homePage").style.display = "none";
@@ -546,7 +547,7 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("resignBtnGame").addEventListener("click", () => {
     const nick = sessionStorage.getItem("trisNickname");
     const lobby = sessionStorage.getItem("currentLobby");
-
+    sessionStorage.removeItem("inGame");
     if (nick && lobby) {
       socket.send(JSON.stringify({
         action: "game",
@@ -566,7 +567,8 @@ window.addEventListener("DOMContentLoaded", () => {
         action: "leavelobby",
         player: nick
       }));
-      sessionStorage.removeItem("currentLobby"); // mantieni il nickname, rimuovi solo la lobby
+      sessionStorage.removeItem("currentLobby"); 
+      sessionStorage.removeItem("inGame")
       showLobbyPage(nick); // torna alla pagina con la lista delle lobby
     }
   });
@@ -576,9 +578,10 @@ window.addEventListener("DOMContentLoaded", () => {
   // ————— 5) BOOTSTRAP INIZIALE —————
 const savedNick = sessionStorage.getItem("trisNickname");
 const currentLobby = sessionStorage.getItem("currentLobby");
-
+const wasInGame = sessionStorage.getItem("inGame") === "true";
 
 if (savedNick) {
+  console.log("nickkkk");
   if (socket.readyState === WebSocket.OPEN) {
     console.log("nick presente");
     // 1. Reinvia il nickname al server
@@ -589,6 +592,22 @@ if (savedNick) {
     }));
 
     if(currentLobby){
+      if(wasInGame)
+      {
+        document.getElementById("homePage").style.display = "none";
+        document.getElementById("lobbyPage").style.display = "none";
+        document.getElementById("lobbyPageUnit").style.display = "none";
+        document.getElementById("gamePage").style.display = "block";
+
+        document.getElementById("nicknameDisplayGame").textContent = savedNick;
+        setTimeout(() => {
+          socket.send(JSON.stringify({
+            action: "resend",
+            move: "cds", 
+            lobby_name: currentLobby
+          }));
+        }, 300);
+      }
       const currentLobbyPass = sessionStorage.getItem("currentLobbyPass");
       console.log("[DEBUG] currentLobbyPass recuperata al bootstrap:", currentLobbyPass);
 
@@ -758,6 +777,7 @@ function handleSocketMessage(event) {
       
     });
     if (data.risultato === "win" || data.risultato==="draw") {
+      sessionStorage.removeItem("inGame");
       const winnerSymbol = data.winner;
       const mySymbol = sessionStorage.getItem("symbol");
 
