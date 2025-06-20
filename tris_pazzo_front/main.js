@@ -602,7 +602,8 @@ if (savedNick) {
         document.getElementById("nicknameDisplayGame").textContent = savedNick;
         setTimeout(() => {
           socket.send(JSON.stringify({
-            action: "resend",
+            action: "game",
+            feedback: "resend",
             move: "cds", 
             lobby_name: currentLobby
           }));
@@ -631,6 +632,7 @@ if (savedNick) {
     }
 
   } else {
+    console.log("dio");
     // Se il socket non è ancora aperto, aspetta e poi esegui entrambi
     socket.addEventListener("open", () => {
       
@@ -641,6 +643,28 @@ if (savedNick) {
       }));
 
       if(currentLobby){
+        if(wasInGame)
+        {
+          console.log("cane");
+          document.getElementById("homePage").style.display = "none";
+          document.getElementById("lobbyPage").style.display = "none";
+          document.getElementById("lobbyPageUnit").style.display = "none";
+          document.getElementById("gamePage").style.display = "block";
+
+          document.getElementById("nicknameDisplayGame").textContent = savedNick;
+          console.log(JSON.stringify({
+              action: "game",
+              feedback: "resend",
+              move: "cds", 
+              lobby_name: currentLobby
+            }));
+
+            socket.send(JSON.stringify({
+              action: "resend",
+              move: "cds", 
+              lobby_name: currentLobby
+            }));
+        }
         // const currentLobbyPass = sessionStorage.getItem("currentLobbyPass");
 
         // console.log("[DEBUG] currentLobbyPass recuperata al bootstrap:", currentLobbyPass);
