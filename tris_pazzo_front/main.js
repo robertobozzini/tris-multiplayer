@@ -250,6 +250,13 @@ function updateLobbyList(lobbies) {
         sessionStorage.setItem("trisLobby", lobby.lobby_name);
         sessionStorage.setItem("currentLobbyPass", "");
 
+        console.log(JSON.stringify({
+          action: "joinlobby",
+          player: sessionStorage.getItem("trisNickname"),
+          lobby_name: lobby.lobby_name,
+          password: ""
+        }));
+
         socket.send(JSON.stringify({
           action: "joinlobby",
           player: sessionStorage.getItem("trisNickname"),
@@ -324,6 +331,11 @@ function Send() {
   if (!nick) return;
   if (socket.readyState === WebSocket.OPEN) {
     console.log("⟳ [Send] Invio { action: 'sendnickname', nickname:", nick, "}");
+    console.log(JSON.stringify({
+      action: "sendnickname",
+      nickname: nick,
+      oldId: sessionStorage.getItem("connectionID") || ""
+    }));
     socket.send(JSON.stringify({
       action: "sendnickname",
       nickname: nick,
