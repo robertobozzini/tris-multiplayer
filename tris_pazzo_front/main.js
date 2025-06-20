@@ -715,6 +715,7 @@ function handleSocketMessage(event) {
 
   // Gestione joinlobby
   if (data.result === "joined") {
+    if (sessionStorage.getItem("inGame") === "true") return;
     const myNickn = sessionStorage.getItem("trisNickname");
     currentPlayer1=data.player1;
     currentPlayer2=data.player2;
