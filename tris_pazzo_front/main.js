@@ -660,7 +660,8 @@ if (savedNick) {
             }));
 
             socket.send(JSON.stringify({
-              action: "resend",
+              action: "game",
+              feedback: "resend",
               move: "cds", 
               lobby_name: currentLobby
             }));
