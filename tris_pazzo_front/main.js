@@ -594,43 +594,36 @@ if (savedNick) {
       oldId: sessionStorage.getItem("connectionID") || ""
     }));
 
-    if(currentLobby){
-      if(wasInGame)
-      {
+    if (currentLobby) {
+      if (wasInGame) {
+   
         document.getElementById("homePage").style.display = "none";
         document.getElementById("lobbyPage").style.display = "none";
         document.getElementById("lobbyPageUnit").style.display = "none";
         document.getElementById("gamePage").style.display = "block";
 
         document.getElementById("nicknameDisplayGame").textContent = savedNick;
+
         setTimeout(() => {
           socket.send(JSON.stringify({
             action: "game",
             feedback: "resend",
-            move: 0, 
+            move: 0,
             lobby_name: currentLobby
           }));
         }, 300);
+      } else {
+        
+        const currentLobbyPass = sessionStorage.getItem("currentLobbyPass");
+        socket.send(JSON.stringify({
+          action: "joinlobby",
+          player: savedNick,
+          lobby_name: currentLobby,
+          password: currentLobbyPass
+        }));
       }
-      const currentLobbyPass = sessionStorage.getItem("currentLobbyPass");
-      console.log("[DEBUG] currentLobbyPass recuperata al bootstrap:", currentLobbyPass);
-
-      console.log("🔐 Invio richiesta joinlobby con:", {
-        action: "joinlobby",
-        player: savedNick,
-        lobby_name: currentLobby,
-        password: currentLobbyPass
-      });
-
-      console.log("lobby presente");
-      socket.send(JSON.stringify({
-        action: "joinlobby",
-        player: savedNick,
-        lobby_name: currentLobby,
-        password: currentLobbyPass
-      }));
-
-    } else{
+    }
+ else{
        if (!wasInGame) showLobbyPage(savedNick);
     }
 
