@@ -622,24 +622,24 @@ if (savedNick) {
       }));
 
       if(currentLobby){
-        const currentLobbyPass = sessionStorage.getItem("currentLobbyPass");
+        // const currentLobbyPass = sessionStorage.getItem("currentLobbyPass");
 
-        console.log("[DEBUG] currentLobbyPass recuperata al bootstrap:", currentLobbyPass);
+        // console.log("[DEBUG] currentLobbyPass recuperata al bootstrap:", currentLobbyPass);
 
-        console.log("🔐 Invio richiesta joinlobby con:", {
-          action: "joinlobby",
-          player: savedNick,
-          lobby_name: currentLobby,
-          password: currentLobbyPass
-        });
+        // console.log("🔐 Invio richiesta joinlobby con:", {
+        //   action: "joinlobby",
+        //   player: savedNick,
+        //   lobby_name: currentLobby,
+        //   password: currentLobbyPass
+        // });
 
-        console.log("lobby presente");
-        socket.send(JSON.stringify({
-          action: "joinlobby",
-          player: savedNick,
-          lobby_name: currentLobby,
-          password: currentLobbyPass
-        }));
+        // console.log("lobby presente");
+        // socket.send(JSON.stringify({
+        //   action: "joinlobby",
+        //   player: savedNick,
+        //   lobby_name: currentLobby,
+        //   password: currentLobbyPass
+        // }));
 
       } else{
         showLobbyPage(savedNick);
