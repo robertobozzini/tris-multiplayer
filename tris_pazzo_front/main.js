@@ -17,8 +17,9 @@ let currentPlayer2 = null;
 let currentTurn = 1; // 1 = player1, 2 = player2
 let boardState = Array(9).fill(null); // "X", "O" o null
 
-
-
+function getMyPlayerNumber() {
+  return parseInt(sessionStorage.getItem("myPlayerNumber"));
+}
 
 let currentFilter = "";  // terrà traccia del testo da filtrare
 function applyFilter() {
@@ -63,7 +64,7 @@ function handleCellClick(index, cell) {
   
   const nick = sessionStorage.getItem("trisNickname");
   if (!nick || boardState[index]) return;
-  const myTurn = (myPlayerNumber === currentTurn);
+  const myTurn = (getMyPlayerNumber() === currentTurn);
   if (!myTurn) return;
 
   console.log(JSON.stringify({
@@ -159,8 +160,8 @@ function sendReady() {
     richiesta: false
   }));
 
-  const btnId = myPlayerNumber === 1 ? "player1ReadyBtn" : "player2ReadyBtn";
-  const statusId = myPlayerNumber === 1 ? "player1Status" : "player2Status";
+  const btnId = getMyPlayerNumber() === 1 ? "player1ReadyBtn" : "player2ReadyBtn";
+  const statusId = getMyPlayerNumber() === 1 ? "player1Status" : "player2Status";
 
   document.getElementById(btnId).textContent = isReady ? "Annulla" : "Pronto?";
   document.getElementById(statusId).textContent = isReady ? "✅ Pronto" : "⏳ In attesa";
@@ -715,7 +716,7 @@ function handleSocketMessage(event) {
 
   // Gestione joinlobby
   if (data.result === "joined") {
-    if (sessionStorage.getItem("inGame") === "true") return;
+    
     const myNickn = sessionStorage.getItem("trisNickname");
     currentPlayer1=data.player1;
     currentPlayer2=data.player2;
@@ -770,11 +771,13 @@ function handleSocketMessage(event) {
 
     if (myNick === p1) {
       myPlayerNumber = 1;
+      sessionStorage.setItem("myPlayerNumber", "1");
       sessionStorage.setItem("symbol", "X");
       document.getElementById("player1ReadyBtn").style.display = "inline-block";
       document.getElementById("player1ReadyBtn").textContent = "Pronto?";
     } else if (myNick === p2) {
       myPlayerNumber = 2;
+      sessionStorage.setItem("myPlayerNumber", "2");
       sessionStorage.setItem("symbol", "O");
       document.getElementById("player2ReadyBtn").style.display = "inline-block";
       document.getElementById("player2ReadyBtn").textContent = "Pronto?";
@@ -923,11 +926,13 @@ function handleSocketMessage(event) {
     // Aggiorna myPlayerNumber e mostra il bottone corretto
     if (myNick === p1) {
       myPlayerNumber = 1;
+      sessionStorage.setItem("myPlayerNumber", "1");
       sessionStorage.setItem("symbol", "X");
       document.getElementById("player1ReadyBtn").style.display = "inline-block";
       document.getElementById("player1ReadyBtn").textContent = "Pronto?";
     } else if (myNick === p2) {
       myPlayerNumber = 2;
+      sessionStorage.setItem("myPlayerNumber", "1");
       sessionStorage.setItem("symbol", "O");
       document.getElementById("player2ReadyBtn").style.display = "inline-block";
       document.getElementById("player2ReadyBtn").textContent = "Pronto?";
@@ -954,7 +959,7 @@ function handleSocketMessage(event) {
       document.getElementById(statusId).textContent = isPlayerReady ? "✅ Pronto" : "⏳ In attesa";
     }
     if (!isOther) {
-      const btnId = myPlayerNumber === 1 ? "player1ReadyBtn" : "player2ReadyBtn";
+      const btnId = getMyPlayerNumber() === 1 ? "player1ReadyBtn" : "player2ReadyBtn";
       document.getElementById(btnId).textContent = isPlayerReady ? "Annulla" : "Pronto?";
     }
 
