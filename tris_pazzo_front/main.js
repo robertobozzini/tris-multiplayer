@@ -585,6 +585,7 @@ if (savedNick) {
     socket.send(JSON.stringify({
       action: "sendnickname",
       nickname: savedNick,
+      oldId: sessionStorage.getItem("connectionID") || ""
     }));
 
     if(currentLobby){
@@ -617,6 +618,7 @@ if (savedNick) {
       socket.send(JSON.stringify({
         action: "sendnickname",
         nickname: savedNick,
+        oldId: sessionStorage.getItem("connectionID") || ""
       }));
 
       if(currentLobby){
