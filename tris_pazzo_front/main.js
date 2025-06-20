@@ -630,7 +630,7 @@ if (savedNick) {
       }));
 
     } else{
-      showLobbyPage(savedNick);
+      if (!wasInGame) showLobbyPage(savedNick);
     }
 
   } else {
@@ -690,7 +690,7 @@ if (savedNick) {
         // }));
 
       } else{
-        showLobbyPage(savedNick);
+        if (!wasInGame) showLobbyPage(savedNick);
       }
     }, { once: true });
   }
@@ -786,6 +786,11 @@ function handleSocketMessage(event) {
       
     const player1Name = document.getElementById("gamePlayer1Name");
     const player2Name = document.getElementById("gamePlayer2Name");
+    currentPlayer1 = data.player1;
+    currentPlayer2 = data.player2;
+
+    document.getElementById("gamePlayer1Name").textContent = currentPlayer1 || "Player 1";
+    document.getElementById("gamePlayer2Name").textContent = currentPlayer2 || "Player 2";
 
     if (currentTurn === 1) {
       player1Name.style.textDecoration = "underline";
