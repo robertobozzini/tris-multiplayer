@@ -554,7 +554,7 @@ window.addEventListener("DOMContentLoaded", () => {
       socket.send(JSON.stringify({
         action: "game",
         feedback: "resign",
-        move: "nulla",
+        move: 0,
         lobby_name: sessionStorage.getItem("currentLobby")
       }));
     }
@@ -606,7 +606,7 @@ if (savedNick) {
           socket.send(JSON.stringify({
             action: "game",
             feedback: "resend",
-            move: "cds", 
+            move: 0, 
             lobby_name: currentLobby
           }));
         }, 300);
@@ -657,7 +657,7 @@ if (savedNick) {
           console.log(JSON.stringify({
               action: "game",
               feedback: "resend",
-              move: "cds", 
+              move: 0, 
               lobby_name: currentLobby
             }));
             
@@ -665,7 +665,7 @@ if (savedNick) {
               socket.send(JSON.stringify({
                 action: "game",
                 feedback: "resend",
-                move: "cds", 
+                move: 0, 
                 lobby_name: currentLobby
               }));
             }, 3000);
