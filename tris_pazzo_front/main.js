@@ -69,13 +69,15 @@ function handleCellClick(index, cell) {
   console.log(JSON.stringify({
     action: "game",
     move: index,
+    feedback: "i",
     lobby_name: sessionStorage.getItem("currentLobby"),
   })
   )
   socket.send(JSON.stringify({
     action: "game",
     move: index,
-    lobby_name: sessionStorage.getItem("currentLobby"),
+    feedback: "s",
+    lobby_name: sessionStorage.getItem("currentLobby")
   }));
 }
 
