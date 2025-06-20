@@ -667,7 +667,7 @@ if (savedNick) {
                 move: 0, 
                 lobby_name: currentLobby
               }));
-            }, 3000);
+            }, 200);
         }
         // const currentLobbyPass = sessionStorage.getItem("currentLobbyPass");
 
@@ -846,10 +846,26 @@ function handleSocketMessage(event) {
 
       const nick = sessionStorage.getItem("trisNickname");
 
-      setTimeout(() => {
-        resetGameState(); 
+
+      const backBtn = document.createElement("button");
+      backBtn.textContent = "Torna alla lobby";
+      backBtn.id = "returnToLobbyBtn";
+
+      backBtn.style.display = "block";
+      backBtn.style.margin = "20px auto 0"; 
+      backBtn.style.padding = "10px 20px";
+      backBtn.style.fontSize = "16px";
+      backBtn.style.cursor = "pointer";
+
+      messageDiv.appendChild(backBtn);
+
+      backBtn.addEventListener("click", () => {
+        resetGameState();
+        messageDiv.style.display = "none";
+        backBtn.remove();
         showLobbyPageUnit(nick);
-      }, 1500);
+      });
+
             
 
       
