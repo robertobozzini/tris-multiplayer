@@ -630,7 +630,7 @@ if (savedNick) {
       }));
 
     } else{
-      if (!wasInGame) showLobbyPage(savedNick);
+      showLobbyPage(savedNick);
     }
 
   } else {
@@ -690,7 +690,7 @@ if (savedNick) {
         // }));
 
       } else{
-        if (!wasInGame) showLobbyPage(savedNick);
+        showLobbyPage(savedNick);
       }
     }, { once: true });
   }
@@ -720,7 +720,8 @@ function handleSocketMessage(event) {
     const myNickn = sessionStorage.getItem("trisNickname");
     currentPlayer1=data.player1;
     currentPlayer2=data.player2;
-  
+    sessionStorage.setItem("player1", data.player1 || "");
+    sessionStorage.setItem("player2", data.player2 || "");
     if ((myNickn === currentPlayer1 && currentPlayer2) || (myNickn === currentPlayer2 && currentPlayer1)) {
       
       socket.send(JSON.stringify({ action:"ready", player:myNickn, isReady:false, richiesta:false }));
@@ -786,11 +787,9 @@ function handleSocketMessage(event) {
       
     const player1Name = document.getElementById("gamePlayer1Name");
     const player2Name = document.getElementById("gamePlayer2Name");
-    currentPlayer1 = data.player1;
-    currentPlayer2 = data.player2;
 
-    document.getElementById("gamePlayer1Name").textContent = currentPlayer1 || "Player 1";
-    document.getElementById("gamePlayer2Name").textContent = currentPlayer2 || "Player 2";
+    player1Name.textContent=sessionStorage.getItem("player1", data.player1 || "");
+    player2Name.textContent=sessionStorage.getItem("player2", data.player2 || "");
 
     if (currentTurn === 1) {
       player1Name.style.textDecoration = "underline";
