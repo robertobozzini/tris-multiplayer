@@ -785,3 +785,62 @@ button:hover {
 #chatSendBtnLobby:hover {
   background-color: #0d6efd;
 }
+
+/* Layout principale per il contenitore di chat durante il gioco */
+#gamePage .chatPlaceholder {
+  display: flex;
+  flex-direction: column;
+  height: 100%;          /* occupa tutta l’altezza disponibile accanto al game board */
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+/* Contenitore messaggi */
+#gamePage .chatPlaceholder #chatMessagesLobbyUnit {
+  flex: 1;               /* cresce per occupare tutto lo spazio verticale disponibile */
+  overflow-y: auto;      /* scroll verticale attivo */
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  min-height: 0;         /* importante per corretto funzionamento del flex */
+  box-sizing: border-box;
+}
+
+/* Riga di input + bottone */
+#gamePage .chatPlaceholder .chatInputRow {
+  flex-shrink: 0;        /* non si contrae mai */
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-top: 1px solid #ccc;
+  gap: 8px;
+  background-color: white;
+}
+
+/* Stili per input e bottone nella chat */
+#gamePage .chatPlaceholder .chatInputRow input {
+  flex: 1;               /* occupa tutto lo spazio disponibile a sinistra */
+  height: 30px;
+  line-height: 30px;
+  padding: 0 10px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+#gamePage .chatPlaceholder .chatInputRow button {
+  height: 30px;
+  padding: 0 12px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #1e90ff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#gamePage .chatPlaceholder .chatInputRow button:hover {
+  background-color: #0d6efd;
+}
