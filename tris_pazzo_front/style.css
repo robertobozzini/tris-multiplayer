@@ -790,8 +790,8 @@ button:hover {
 #gamePage .chatPlaceholder {
   display: flex;
   flex-direction: column;
-  height: 380px; /* Altezza fissa desiderata */
-  max-height: 100%; /* Previene overflow oltre il contenitore padre */
+  height: 380px; 
+  max-height: 100%; 
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 0 8px rgba(0,0,0,0.1);
@@ -844,4 +844,18 @@ button:hover {
 
 #gamePage .chatPlaceholder .chatInputRow button:hover {
   background-color: #0d6efd;
+}
+
+.chat-messages,
+.chat-message,
+.chatPlaceholder,
+#chatMessagesLobbyUnit,
+#chatMessages,
+.chat-content {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  white-space: normal;
 }
