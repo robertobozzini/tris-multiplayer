@@ -790,7 +790,8 @@ button:hover {
 #gamePage .chatPlaceholder {
   display: flex;
   flex-direction: column;
-  height: 100%;          /* occupa tutta l’altezza disponibile accanto al game board */
+  height: 380px; /* Altezza fissa desiderata */
+  max-height: 100%; /* Previene overflow oltre il contenitore padre */
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 0 8px rgba(0,0,0,0.1);
