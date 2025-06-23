@@ -194,84 +194,101 @@ function updateLobbyList(lobbies) {
   if (!Array.isArray(lobbies) || lobbies.length === 0) {
     const li = document.createElement("li");
     li.textContent = "Nessuna lobby disponibile";
+    li.style.justifyContent = "center";
+    li.style.fontStyle = "italic";
+    li.style.color = "#666";
     ul.appendChild(li);
     return;
   }
 
-  lobbies.forEach(lobby => {
-    console.log("· lobby:", lobby);
-    const li = document.createElement("li");
-    const isPrivate = lobby.private === '1' ? "🔒" : "";
-    li.textContent = `${lobby.lobby_name} – ${lobby.players}/2 giocatori – ${lobby.stato} ${isPrivate}`;
-    li.style.cursor = "pointer";
-    li.addEventListener("click", () => {
-      console.log("→ click JOIN", lobby.lobby_name);
-      if(lobby.players==2) return
-      if (lobby.private === '1') {
-        // Mostra il modal per la password
-        document.getElementById("passwordModal").style.display = "flex";
-        document.getElementById("lobbyPasswordInput").value = ""; // reset campo
-        document.getElementById("lobbyPasswordInput").style.borderColor = "#ccc"; // reset colore bordo
+lobbies.forEach(lobby => {
+  console.log("· lobby:", lobby);
+  const li = document.createElement("li");
+  li.style.cursor = "pointer";
 
-        const passwordInput = document.getElementById("lobbyPasswordInput");
+  // ELEMENTI INTERNI
+  const nameSpan = document.createElement("span");
+  nameSpan.className = "lobby-name";
+  nameSpan.textContent = lobby.lobby_name;
 
-        document.getElementById("confirmJoinBtn").onclick = () => {
-          const pwd = passwordInput.value.trim();
-          if (!pwd) {
-            passwordInput.style.borderColor = "red";
-            return;
-          }
-          passwordInput.style.borderColor = "#ccc"; // reset
+  const playersSpan = document.createElement("span");
+  playersSpan.className = "lobby-players";
+  playersSpan.textContent = `${lobby.players}/2`;
 
-          sessionStorage.setItem("currentLobbyPass", pwd);
-          console.log("ws");
-          socket.send(JSON.stringify({
-            action: "joinlobby",
-            player: sessionStorage.getItem("trisNickname"),
-            lobby_name: lobby.lobby_name,
-            password: pwd
-          }));
-          
-          sessionStorage.setItem("currentLobby", lobby.lobby_name);
+  const statoSpan = document.createElement("span");
+  statoSpan.className = "lobby-stato";
+  statoSpan.textContent = lobby.stato;
 
-        };
+  const lockSpan = document.createElement("span");
+  lockSpan.className = "lobby-lock";
+  lockSpan.textContent = lobby.private === '1' ? "🔒" : "";
 
-        // Quando l’utente modifica il campo, resetta il bordo
-        passwordInput.addEventListener("input", () => {
-          passwordInput.style.borderColor = "#ccc";
-        });
+  // ASSEMBLA
+  li.appendChild(nameSpan);
+  li.appendChild(playersSpan);
+  li.appendChild(statoSpan);
+  li.appendChild(lockSpan); 
 
-        document.getElementById("cancelJoinBtn").onclick = () => {
-          document.getElementById("passwordModal").style.display = "none";
-        };
+  // CLICK
+  li.addEventListener("click", () => {
+    console.log("→ click JOIN", lobby.lobby_name);
+    if (lobby.players == 2) return;
 
-        passwordInput.addEventListener("keypress", e => {
-        if (e.key === "Enter") {
-          confirmJoinBtn.click();
+    if (lobby.private === '1') {
+      // Mostra il modal per la password
+      document.getElementById("passwordModal").style.display = "flex";
+      const passwordInput = document.getElementById("lobbyPasswordInput");
+      passwordInput.value = "";
+      passwordInput.style.borderColor = "#ccc";
+
+      document.getElementById("confirmJoinBtn").onclick = () => {
+        const pwd = passwordInput.value.trim();
+        if (!pwd) {
+          passwordInput.style.borderColor = "red";
+          return;
         }
-        });
-
-      } else {
-        sessionStorage.setItem("trisLobby", lobby.lobby_name);
-        sessionStorage.setItem("currentLobbyPass", "");
-
-        console.log(JSON.stringify({
-          action: "joinlobby",
-          player: sessionStorage.getItem("trisNickname"),
-          lobby_name: lobby.lobby_name,
-          password: ""
-        }));
+        passwordInput.style.borderColor = "#ccc";
+        sessionStorage.setItem("currentLobbyPass", pwd);
+        sessionStorage.setItem("currentLobby", lobby.lobby_name);
 
         socket.send(JSON.stringify({
           action: "joinlobby",
           player: sessionStorage.getItem("trisNickname"),
           lobby_name: lobby.lobby_name,
-          password: ""
+          password: pwd
         }));
-      }
-    });
-    ul.appendChild(li);
+      };
+
+      document.getElementById("cancelJoinBtn").onclick = () => {
+        document.getElementById("passwordModal").style.display = "none";
+      };
+
+      passwordInput.addEventListener("input", () => {
+        passwordInput.style.borderColor = "#ccc";
+      });
+
+      passwordInput.addEventListener("keypress", e => {
+        if (e.key === "Enter") {
+          confirmJoinBtn.click();
+        }
+      });
+
+    } else {
+      sessionStorage.setItem("trisLobby", lobby.lobby_name);
+      sessionStorage.setItem("currentLobbyPass", "");
+
+      socket.send(JSON.stringify({
+        action: "joinlobby",
+        player: sessionStorage.getItem("trisNickname"),
+        lobby_name: lobby.lobby_name,
+        password: ""
+      }));
+    }
   });
+
+  ul.appendChild(li);
+});
+
   applyFilter()
 }
 
@@ -465,6 +482,56 @@ window.addEventListener("DOMContentLoaded", () => {
       document.getElementById("newLobbyName").value = "";
       document.getElementById("newLobbyPassword").value = "";
       showLobbyPage(nick);
+    }
+  });
+// chat
+  const chatInput = document.getElementById("chatInput");
+  const chatInput2 = document.getElementById("chatInput2"); // aggiunto
+  const chatSendBtn = document.getElementById("chatSendBtn");
+  const chatSendBtnLobby = document.getElementById("chatSendBtnLobby");
+
+  function sendChatMessage(a) {
+    const message = (a === 1 ? chatInput : chatInput2).value.trim();
+    if (!message) return;
+
+    let msgObj;
+    if (a === 1) {
+      msgObj = {
+        action: "chat",
+        msg: message
+      };
+      console.log(msgObj);
+    } else {
+      msgObj = {
+        action: "chatlobby",
+        msg: message,
+        lobby_name: sessionStorage.getItem("currentLobby")
+      };
+      console.log(msgObj);
+    }
+
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify(msgObj));
+      (a === 1 ? chatInput : chatInput2).value = ""; // pulizia campo giusto
+    } else {
+      alert("Connessione WebSocket non attiva.");
+    }
+  }
+
+  // Event listener click e invio con enter
+  chatSendBtn.addEventListener("click", () => sendChatMessage(1));
+  chatInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendChatMessage(1);
+    }
+  });
+
+  chatSendBtnLobby.addEventListener("click", () => sendChatMessage(2));
+  chatInput2.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendChatMessage(2);
     }
   });
 
@@ -866,46 +933,6 @@ function handleSocketMessage(event) {
         showLobbyPageUnit(nick);
       });
 
-            
-
-      
-      // const lobby = sessionStorage.getItem("currentLobby");
-      // const password = sessionStorage.getItem("currentLobbyPass") || "";
-      
-      // const delayPlayer = myPlayerNumber === 1 ? 0 : 500; // Player 2 aspetta 0.5s in più
-      // const baseDelay = 2500; // mostra messaggio per 2.5s
-
-      // setTimeout(() => {
-      //   // 1. LEAVE
-      //   setTimeout(() => {
-      //     if (nick) {
-      //       socket.send(JSON.stringify({
-      //         action: "leavelobby",
-      //         player: nick
-      //       }));
-      //       console.log(`[LEAVE] Inviato da ${nick}`);
-      //     }
-      //   }, 500 + delayPlayer); // P1: 0.5s — P2: 1.0s
-      //   setTimeout(() => {
-      //     if (nick) {
-      //       socket.send(JSON.stringify({
-      //         action: "joinlobby",
-      //         player: nick,
-      //         lobby_name: lobby,
-      //         password: password
-      //       }));
-      //       console.log(`[JOIN] Inviato da ${nick}`);
-      //     }
-
-      //     document.getElementById("gameResultMessage").style.display = "none";
-      //     if (nick) showLobbyPageUnit(nick);
-
-      //   }, 1000 + delayPlayer); // P1: 1.0s — P2: 1.5s
-
-      // }, baseDelay); // attesa iniziale di 2.5s
-
-
-
       return; // esci dal blocco feedback
     }
 
@@ -955,6 +982,38 @@ function handleSocketMessage(event) {
     }
 
     showLobbyPageUnit();
+  }
+  else if (data.result === "chat") {
+    const chatMessages = document.getElementById("chatMessages");
+    chatMessages.innerHTML = ""; // Pulisci la chat attuale
+
+    data.messages.forEach(msgString => {
+      const messageDiv = document.createElement("div");
+      messageDiv.textContent = msgString;  // msgString è già "player: message"
+      messageDiv.style.padding = "4px 8px";
+      messageDiv.style.borderBottom = "1px solid #ddd";
+
+      chatMessages.appendChild(messageDiv);
+    });
+
+    chatMessages.scrollTop = chatMessages.scrollHeight; // scrolla in basso
+    return;
+  }
+  else if(data.result==="namelist")
+  {
+    const listnames = document.getElementById("onlinePlayersList");
+    listnames.innerHTML = "";   
+    data.users.forEach(playerString => {
+      const messageDiv = document.createElement("div");
+      messageDiv.textContent = playerString["nickname"];  
+      messageDiv.style.padding = "4px 8px";
+      messageDiv.style.borderBottom = "1px solid #ddd";
+
+      listnames.appendChild(messageDiv);
+    });
+
+    listnames.scrollTop = listnames.scrollHeight; // scrolla in basso
+    return;
   }
   else if (data.result === "ready") {
     const nick = data.player;
