@@ -489,34 +489,69 @@ window.addEventListener("DOMContentLoaded", () => {
   const chatInput2 = document.getElementById("chatInput2"); // aggiunto
   const chatSendBtn = document.getElementById("chatSendBtn");
   const chatSendBtnLobby = document.getElementById("chatSendBtnLobby");
+  const chatInput3 = document.getElementById("chatInput3"); // aggiunto
+  const chatSendBtnLobbyUnit = document.getElementById("chatSendBtnLobbyUnit");
 
-  function sendChatMessage(a) {
-    const message = (a === 1 ? chatInput : chatInput2).value.trim();
-    if (!message) return;
+function sendChatMessage(a) {
+  let message = "";
+  let msgObj;
 
-    let msgObj;
-    if (a === 1) {
+  switch (a) {
+    case 1:
+      message = chatInput.value.trim();
+      if (!message) return;
       msgObj = {
         action: "chat",
         msg: message
       };
-      console.log(msgObj);
-    } else {
+      console.log("[Chat] Messaggio da input 1:", message);
+      console.log("[Chat] Oggetto inviato:", msgObj);
+      break;
+
+    case 2:
+      message = chatInput2.value.trim();
+      if (!message) return;
       msgObj = {
         action: "chatlobby",
         msg: message,
+        number:1,
         lobby_name: sessionStorage.getItem("currentLobby")
       };
-      console.log(msgObj);
-    }
+      console.log("[Lobby] Messaggio da input 2:", message);
+      console.log("[Lobby] Oggetto inviato:", msgObj);
+      break;
 
-    if (socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify(msgObj));
-      (a === 1 ? chatInput : chatInput2).value = ""; // pulizia campo giusto
-    } else {
-      alert("Connessione WebSocket non attiva.");
-    }
+    case 3:
+      message = chatInput3.value.trim();
+      if (!message) return;
+      msgObj = {
+        action: "chatlobby",
+        number:2,
+        msg: message,
+        lobby_name: sessionStorage.getItem("currentLobby")
+      };
+      console.log("[LobbyUnit] Messaggio da input 3:", message);
+      console.log("[LobbyUnit] Oggetto inviato:", msgObj);
+      break;
+
+    default:
+      console.warn("sendChatMessage: parametro non riconosciuto:", a);
+      return;
   }
+
+  if (socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify(msgObj));
+    console.log("[WebSocket] Messaggio inviato con successo.");
+
+    if (a === 1) chatInput.value = "";
+    else if (a === 2) chatInput2.value = "";
+    else if (a === 3) chatInput3.value = "";
+  } else {
+    console.error("Connessione WebSocket non attiva.");
+    alert("Connessione WebSocket non attiva.");
+  }
+}
+
 
   // Event listener click e invio con enter
   chatSendBtn.addEventListener("click", () => sendChatMessage(1));
@@ -535,6 +570,13 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  chatSendBtnLobbyUnit.addEventListener("click", () => sendChatMessage(3));
+  chatInput3.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendChatMessage(3);
+    }
+  });
 
   // ————— 3) CREA LOBBY —————
   const newLobbyNameInput = document.getElementById("newLobbyName");
@@ -768,7 +810,8 @@ if (savedNick) {
 
 // ————— Funzione centralizzata per i message —————
 function handleSocketMessage(event) {
-  const raw = event.data;
+  const raw = event.data; 
+  console.log("📩 Messaggio ricevuto (raw):", raw);
   if (!raw || raw.trim() === "") return;
 
   let data;
@@ -984,7 +1027,10 @@ function handleSocketMessage(event) {
     showLobbyPageUnit();
   }
   else if (data.result === "chat") {
-    const chatMessages = document.getElementById("chatMessages");
+    let chatMessages;
+    if(!data.private) chatMessages = document.getElementById("chatMessages");
+    else if (data.number===1) chatMessages = document.getElementById("chatMessagesLobby");
+    else chatMessages = document.getElementById("chatMessagesLobbyUnit");
     chatMessages.innerHTML = ""; // Pulisci la chat attuale
 
     data.messages.forEach(msgString => {
