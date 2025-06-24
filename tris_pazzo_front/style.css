@@ -1,10 +1,19 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-y: scroll;
+}
+
 /* Imposta lo sfondo nero e centra il contenuto */
 body {
   margin: 0;
   padding: 0;
-  height: 100vh;
+  min-height: 100vh;
   background-image: url("images/sfondo.png");
   background-color: black; /* sfondo nero */
+  background-attachment: fixed;
   display: flex;
   justify-content: center; /* centro orizzontale */
   align-items: center;     /* centro verticale */
@@ -20,27 +29,85 @@ body::before {
   z-index: 0;
 }
 
-/* Blocca il contenuto al centro */
-main {
-  background-color: #fff; /* sfondo bianco per contrasto */
-  color: #000;
-  padding: 2rem;
-  z-index: 1;
-  border-radius: 12px;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-  width: 90%;
-  max-width: 400px;
+.section{
   text-align: center;
+  z-index: 3;
+}
+/* Blocca il contenuto al centro */
+#homePage {
+  position: fixed;
+  top: 50%;
+  left: 52%; /* spostato leggermente a destra */
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  width: 100%;
+  text-align: center;
+  max-width: 700px; /* restringi rispetto agli 800px precedenti */
+  padding: 2rem;
 }
 
+
+
+#homePage main {
+  background-color: white;
+  padding: 2rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  z-index: 2;
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+}
+
+
+
+#nicknameDisplay{
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-weight: bold;
+  border: 2px solid white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background-color: white;
+  color: black;
+  z-index: 2;
+}
+
+#logoutBtn {
+  position: absolute;
+  top: 50px;         /* regola questo valore se serve */
+  left: 10px;
+  font-weight: bold;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  border: 1px solid white;
+  border-radius: 8px;
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  z-index: 2;
+}
+
+#logoutBtn:hover {
+  background-color: #f0f0f0;
+}
+
+#title{
+  font-weight: bold;
+
+}
 /* Input e bottoni */
 input {
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;  /* padding orizzontale sufficiente */
   font-size: 1rem;
   margin-bottom: 1.5rem;
   width: 100%;
-  box-sizing: border-box;
+  box-sizing: border-box;  /* importante per non sforare */
+  border: 1px solid #ccc;  /* se manca, aggiungilo */
+  border-radius: 8px;      /* facoltativo, per armonia visiva */
 }
+
 
 .buttons {
   display: flex;
@@ -67,4 +134,728 @@ button:hover {
   background-color: white;
   color: black;
   border: 1px solid black;
+}
+
+.lobbiesMain{
+  margin-top: 0px auto;
+  z-index: 3;
+  position: relative; 
+}
+
+#createLobby{
+  margin-bottom: 30px;
+}
+
+
+#lobbyPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 60px 20px 0;
+  padding-top: 30px;
+  align-items: flex-start;
+}
+
+#lobbyPage .lobbiesMain {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  width: 600px;
+  text-align: center;
+}
+
+
+.lobbyLayout {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  width: 100%;
+  max-width: 1200px;
+  align-items: flex-start;
+}
+
+.lobbyUnitLayout {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 30px;
+  margin-left: 40px;
+  align-items: flex-start;
+}
+
+.lobbyUnitControls {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+#nicknameDisplayUnit,
+#logoutBtnUnit,
+#exitLobbyBtn {
+  position: static; /* rimuove il posizionamento assoluto */
+}
+
+.gameLayout {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  width: 100%;
+  max-width: 1200px;
+  margin-left: 40px;
+  margin-top: 80px;
+  align-items: flex-start;
+}
+
+.lobbiesMain {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  width: 550px;
+}
+
+.chatPlaceholder {
+  flex: 1;
+  min-width: 300px;
+  max-height: 500px;
+  background-color: white;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.chatPlaceholder #chatMessages {
+  flex: 1;
+  min-height: 150px; /* imposta l'altezza minima visibile */
+  padding: 10px;
+  overflow-y: auto;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.chatPlaceholder .chatInputRow {
+  display: flex;
+  padding: 8px;
+  gap: 8px;
+  border-top: 1px solid #ccc;
+  align-items: center;
+}
+
+.chatPlaceholder .chatInputRow input,
+.chatPlaceholder .chatInputRow button {
+  height: 30px;       /* altezza fissa uguale per input e bottone */
+  line-height: 30px;  /* centratura verticale del testo */
+  padding: 0 10px;    /* padding orizzontale */
+  box-sizing: border-box; /* importante per evitare overflow */
+  font-size: 0.9rem;
+  margin-bottom: 0;
+  border-radius: 6px;
+}
+
+.chatPlaceholder button {
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.chatPlaceholder button:hover {
+  background-color: #0d6efd;
+}
+
+
+#lobbyList {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-height: 300px;       
+  overflow-y: auto;          
+  width: 100%;
+}
+
+#lobbyList::-webkit-scrollbar {
+  width: 8px;
+}
+#lobbyList::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+#lobbyList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  width: 100%;
+  max-width: 500px;
+  box-sizing: border-box;
+  transition: background-color 0.2s;
+}
+
+#lobbyList li:hover {
+  background-color: #eef5ff;
+}
+
+.lobby-name {
+  flex: 2;
+  text-align: left;
+  font-weight: bold;
+}
+
+.lobby-players {
+  flex: 1;
+  text-align: left;    
+  padding-left: 10px;  
+  color: #555;
+}
+
+.lobby-stato {
+  flex: 1;
+  text-align: right;
+  font-style: italic;
+  color: #888;
+}
+
+.lobby-lock {
+  width: 30px;
+  text-align: center;
+  font-size: 1rem;
+  color: #999;
+  flex-shrink: 0;
+}
+
+
+
+@media (max-width: 600px) {
+  #lobbyPage .lobbiesMain {
+    width: 95%;
+    max-width: none;
+    padding: 0.5rem;
+    margin-top: 20px;
+  }
+
+  #lobbyList li {
+    max-width: 100%;
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+
+  #nicknameDisplay, #logoutBtn {
+    font-size: 0.8rem;
+    padding: 4px 6px;
+    top: 8px;
+  }
+
+  #logoutBtn {
+    top: 40px;
+  }
+}
+
+/*mostra password per joinare priv*/
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6); /* sfondo scuro */
+  display: none; /* nascosto di default */
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  width: 90%;
+  max-width: 350px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #1e90ff;
+  color: white;
+  cursor: pointer;
+}
+
+.modal-buttons button:hover {
+  background-color: #0d6efd;
+}
+
+
+
+#nicknameDisplayUnit {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-weight: bold;
+  border: 2px solid white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background-color: white;
+  color: black;
+  z-index: 2;
+}
+
+#logoutBtnUnit, #exitLobbyBtn {
+  position: absolute;
+  left: 10px;
+  font-weight: bold;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  border: 1px solid white;
+  border-radius: 8px;
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  z-index: 2;
+}
+
+#logoutBtnUnit {
+  top: 50px;
+}
+
+#exitLobbyBtn {
+  top: 83px;
+}
+
+#logoutBtnUnit:hover, #exitLobbyBtn:hover {
+  background-color: #f0f0f0;
+}
+
+
+#lobbyInfoContainer {
+  margin: 0;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 500px;
+}
+
+#lobbyNameDisplay {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+#playersDisplay {
+  display: flex;
+  justify-content: space-around;
+  gap: 1rem;
+}
+
+.playerBox {
+  flex: 1;
+  padding: 1rem;
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.readyBtn {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  background-color: #1e90ff;
+  color: white;
+  cursor: pointer;
+}
+
+.readyBtn:hover {
+  background-color: #0b6ecf;
+}
+
+.playerStatus {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+#countdownTimer {
+  margin-top: 2rem;
+  font-size: 2rem;
+  font-weight: bold;
+  color: red;
+  text-align: center;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.player-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.player-slot span {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Simboli */
+.player-symbol-x {
+  color: #007bff; /* azzurro */
+}
+.player-symbol-o {
+  color: #e63946; /* rosso */
+}
+
+.game-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  z-index: 3;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+
+.game-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.player-name {
+  flex: 1;
+  text-align: center;
+}
+
+.vs-separator {
+  margin: 0 12px;
+  color: #666;
+}
+
+.game-board {
+  width: 100%;
+  /* imposta qui le dimensioni del tuo campo */
+  height: 400px;
+  background: #f9f9f9;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+}
+
+#gamePage {
+  position: relative; /* o absolute/fixed se già usato */
+  z-index: 9999;      /* più alto di qualsiasi overlay */
+}
+
+#gameBoard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 10px;
+  width: 300px;       /* oppure usa % per responsive */
+  height: 300px;
+  margin: 0 auto;
+  background-color: #eee;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.cell {
+  background-color: white;
+  border: 2px solid #333;
+  font-size: 48px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;  /* facoltativo se usi grid */
+  height: 100%;
+}
+
+#logoutBtnGame, #exitGameBtn {
+  position: fixed;
+  left: 10px;
+  font-weight: bold;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  border: 1px solid white;
+  border-radius: 8px;
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  z-index: 2;
+}
+
+#logoutBtnGame { top: 50px; }
+#exitGameBtn { top: 83px; }
+
+#logoutBtnGame:hover, #exitGameBtn:hover {
+  background-color: #f0f0f0;
+}
+
+#nicknameDisplayGame {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  font-weight: bold;
+  border: 2px solid white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background-color: white;
+  color: black;
+  z-index: 2;
+}
+
+#resignBtnGame {
+  position: fixed;
+  left: 10px;
+  top: 116px;  /* sotto Leave */
+  font-weight: bold;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  border: 1px solid white;
+  border-radius: 8px;
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  z-index: 2;
+}
+
+#resignBtnGame:hover {
+  background-color: #f0f0f0;
+}
+
+.chatPlaceholder {
+  display: flex;
+  flex-direction: column;
+  height: 600px;           /* altezza fissa totale della chat */
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+#chatGlobale #chatMessages {
+  flex: 1;                /* occupa tutto lo spazio verticale possibile */
+  overflow-y: auto;       /* scroll verticale attivo */
+  padding-bottom: 0px;   /* spazio bianco in fondo alla lista messaggi */
+  box-sizing: content-box; /* assicurati che il padding non riduca l'altezza */
+}
+
+.chatPlaceholder .chatInputRow {
+  flex-shrink: 0;         /* non si riduce, sempre visibile */
+  padding: 8px;
+  border-top: 1px solid #ccc;
+  display: flex;
+  gap: 8px;
+}
+
+.chatWrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  max-width: 350px;
+  height: 650px;
+  gap: 1rem;
+}
+
+#onlinePlayersBox {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  height: 200px;  /* meglio usare height invece di max-height */
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+#onlinePlayersBox h3 {
+  margin-top: 0;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+#onlinePlayersList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#onlinePlayersList li {
+  padding: 4px 8px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+/* Chat nella lobby singola */
+#lobbyPageUnit .chatPlaceholder {
+  display: flex;
+  flex-direction: column;
+  height: 400px;               /* Altezza totale della chat */
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  flex: 1;                     /* Occupa lo spazio disponibile accanto alla lobby */
+}
+
+#chatMessagesLobby {
+  flex: 1;                     /* Riempie tutto lo spazio verticale disponibile */
+  overflow-y: auto;            /* Scroll verticale */
+  padding: 10px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #ccc;
+  min-height: 150px;
+  box-sizing: border-box;
+}
+
+#lobbyPageUnit .chatInputRow {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border-top: 1px solid #ccc;
+  flex-shrink: 0;              /* Impedisce che venga compresso */
+}
+
+#lobbyPageUnit .chatInputRow input,
+#lobbyPageUnit .chatInputRow button {
+  height: 30px;
+  line-height: 30px;
+  font-size: 0.9rem;
+  padding: 0 10px;
+  border-radius: 6px;
+  margin-bottom: 0;
+  box-sizing: border-box;
+}
+
+#chatSendBtnLobby {
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#chatSendBtnLobby:hover {
+  background-color: #0d6efd;
+}
+
+/* Layout principale per il contenitore di chat durante il gioco */
+#gamePage .chatPlaceholder {
+  display: flex;
+  flex-direction: column;
+  height: 380px; 
+  max-height: 100%; 
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+/* Contenitore messaggi */
+#gamePage .chatPlaceholder #chatMessagesLobbyUnit {
+  flex: 1;               /* cresce per occupare tutto lo spazio verticale disponibile */
+  overflow-y: auto;      /* scroll verticale attivo */
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  min-height: 0;         /* importante per corretto funzionamento del flex */
+  box-sizing: border-box;
+}
+
+/* Riga di input + bottone */
+#gamePage .chatPlaceholder .chatInputRow {
+  flex-shrink: 0;        /* non si contrae mai */
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-top: 1px solid #ccc;
+  gap: 8px;
+  background-color: white;
+}
+
+/* Stili per input e bottone nella chat */
+#gamePage .chatPlaceholder .chatInputRow input {
+  flex: 1;               /* occupa tutto lo spazio disponibile a sinistra */
+  height: 30px;
+  line-height: 30px;
+  padding: 0 10px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+#gamePage .chatPlaceholder .chatInputRow button {
+  height: 30px;
+  padding: 0 12px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #1e90ff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#gamePage .chatPlaceholder .chatInputRow button:hover {
+  background-color: #0d6efd;
+}
+
+.chat-messages,
+.chat-message,
+.chatPlaceholder,
+#chatMessagesLobbyUnit,
+#chatMessages,
+.chat-content {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  white-space: normal;
 }
